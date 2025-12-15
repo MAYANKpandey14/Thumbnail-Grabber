@@ -19,6 +19,8 @@ import { Label } from "@/components/ui/label";
 import { useFolders } from "@/hooks/useFolders";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AddToFolderDialogProps {
     open: boolean;
@@ -52,11 +54,7 @@ export function AddToFolderDialog({ open, onOpenChange, video }: AddToFolderDial
         if (!selectedFolderId || !video) return;
         setIsSaving(true);
 
-        // Dynamic import of the hook? No.
-        // Just importing supabase.
-        const { supabase } = await import("@/lib/supabaseClient");
-        const { useAuth } = await import("@/hooks/useAuth"); // Can't use hook in callback easily without violations if strict.
-
+        // Static imports used directly
         // I'll grab user from session or I should pass it.
         // Let's assume user is authed.
 
