@@ -1,4 +1,3 @@
-"use client";
 
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -6,7 +5,7 @@ import HeroInput from "@/components/HeroInput";
 import ThumbnailGrid from "@/components/ThumbnailGrid";
 import { Thumbnail, ThumbnailResponse } from "@/types";
 import { toast } from "sonner";
-import { extractVideoId } from "@/lib/utils";
+import { getThumbnails } from "@/lib/youtube";
 import { useGuestLimit } from "@/hooks/useGuestLimit";
 import { createClient } from "@/lib/supabase";
 import { useEffect } from "react";
@@ -28,7 +27,7 @@ export default function Home() {
 
     // Check guest limit for Search (optional, but good practice to limit guests spamming search)
     // Currently we only limit Downloads as per hook design
-    
+
     setLoading(true);
     setResults([]);
 
@@ -37,31 +36,18 @@ export default function Home() {
 
     try {
       const fetchPromises = urls.map(async (url) => {
-         const videoId = extractVideoId(url);
-         if (!videoId) return null;
-
-         try {
-           const res = await fetch('/api/download', {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ url }),
-           });
-           
-           if (!res.ok) throw new Error('Failed');
-           
-           const data: ThumbnailResponse = await res.json();
-           const validThumbnails = data.thumbnails.filter(t => t.url);
-           return { ...data, thumbnails: validThumbnails };
-         } catch (e) {
-           console.error(`Error fetching ${url}`, e);
-           errorCount++;
-           return null;
-         }
+        // Use client-side generation to avoid backend dependency for public images
+        const data = getThumbnails(url);
+        if (!data) {
+          errorCount++;
+          return null;
+        }
+        return data;
       });
 
       const settled = await Promise.all(fetchPromises);
       const validData = settled.filter((item): item is ThumbnailResponse => item !== null && item.thumbnails.length > 0);
-      
+
       setResults(validData);
 
       if (validData.length === 0 && errorCount > 0) {
@@ -85,8 +71,8 @@ export default function Home() {
 
   const checkDownloadAllowed = (): boolean => {
     if (!incrementCount()) {
-       toast.error("Daily limit reached. Login for more!");
-       return false;
+      toast.error("Daily limit reached. Login for more!");
+      return false;
     }
     return true;
   };
@@ -94,43 +80,43 @@ export default function Home() {
   const handleDownloadComplete = async (blob: Blob, thumb: Thumbnail, videoId: string) => {
     // If user is logged in, save to Supabase
     if (user) {
-       try {
-         const videoData = results.find(r => r.videoId === videoId);
-         
-         // 1. Upload to Storage
-         const fileName = `${user.id}/${videoId}/${thumb.quality}.jpg`;
-         const { error: uploadError } = await supabase.storage
-           .from('thumbnails')
-           .upload(fileName, blob, { upsert: true });
+      try {
+        const videoData = results.find(r => r.videoId === videoId);
 
-         if (!uploadError) {
-           // 2. Insert into History
-           const { data: dlData } = await supabase
-             .from('user_downloads')
-             .insert({
-                user_id: user.id,
-                video_id: videoId,
-                video_url: `https://youtube.com/watch?v=${videoId}`,
-                video_title: `Video ${videoId}`, // Fallback title
-                thumbnails: videoData ? videoData.thumbnails : []
-             })
-             .select()
-             .single();
-            
-            if (dlData) {
-               await supabase.from('saved_thumbnails').insert({
-                  user_id: user.id,
-                  download_id: dlData.id,
-                  quality: thumb.quality,
-                  image_url: thumb.url,
-                  file_path: fileName,
-                  dimensions: thumb.dimensions
-               });
-            }
-         }
-       } catch (e) {
-         console.error("Failed to track download", e);
-       }
+        // 1. Upload to Storage
+        const fileName = `${user.id}/${videoId}/${thumb.quality}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('thumbnails')
+          .upload(fileName, blob, { upsert: true });
+
+        if (!uploadError) {
+          // 2. Insert into History
+          const { data: dlData } = await supabase
+            .from('user_downloads')
+            .insert({
+              user_id: user.id,
+              video_id: videoId,
+              video_url: `https://youtube.com/watch?v=${videoId}`,
+              video_title: `Video ${videoId}`, // Fallback title
+              thumbnails: videoData ? videoData.thumbnails : []
+            })
+            .select()
+            .single();
+
+          if (dlData) {
+            await supabase.from('saved_thumbnails').insert({
+              user_id: user.id,
+              download_id: dlData.id,
+              quality: thumb.quality,
+              image_url: thumb.url,
+              file_path: fileName,
+              dimensions: thumb.dimensions
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to track download", e);
+      }
     }
   };
 
@@ -139,7 +125,7 @@ export default function Home() {
       <Navbar />
       <main className="flex-1 bg-gradient-to-b from-red-50/50 to-background dark:from-red-950/20 dark:to-background">
         <HeroInput onSearch={handleSearch} isLoading={loading} />
-        
+
         <div className="container px-4 pb-20">
           {!user && (
             <div className="text-center mb-8 text-sm text-muted-foreground">
@@ -148,8 +134,8 @@ export default function Home() {
           )}
 
           {results.length > 0 && (
-            <ThumbnailGrid 
-              results={results} 
+            <ThumbnailGrid
+              results={results}
               checkDownloadAllowed={checkDownloadAllowed}
               onDownloadComplete={handleDownloadComplete}
             />

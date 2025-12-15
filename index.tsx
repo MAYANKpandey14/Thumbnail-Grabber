@@ -1,4 +1,5 @@
 import React from "react";
+import "./globals.css";
 import { createRoot } from "react-dom/client";
 import { Route, Switch, Router } from "wouter";
 import RootLayout from "./app/layout";
@@ -18,10 +19,10 @@ const App = () => {
         <Route path="/dashboard" component={Dashboard} />
         <Route>
           <div className="flex items-center justify-center min-h-screen">
-             <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">404</h1>
-                <p>Page not found</p>
-             </div>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">404</h1>
+              <p>Page not found</p>
+            </div>
           </div>
         </Route>
       </Switch>
