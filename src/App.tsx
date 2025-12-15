@@ -1,3 +1,7 @@
+import { Navigate } from 'react-router-dom';
+import History from './routes/dashboard/History';
+import Folders from './routes/dashboard/Folders';
+import FolderDetails from './routes/dashboard/FolderDetails';
 import { Routes, Route } from 'react-router-dom';
 import Home from './routes/Home';
 import Dashboard from './routes/Dashboard';
@@ -25,7 +29,12 @@ function App() {
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />}>
+                    <Route index element={<Navigate to="history" replace />} />
+                    <Route path="history" element={<History />} />
+                    <Route path="folders" element={<Folders />} />
+                    <Route path="folders/:folderId" element={<FolderDetails />} />
+                </Route>
             </Route>
 
             {/* Fallback */}

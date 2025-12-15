@@ -35,3 +35,22 @@ export interface SavedThumbnail {
   dimensions: string;
   created_at: string;
 }
+
+export interface ThumbnailFolder {
+  id: string;
+  user_id: string;
+  name: string;
+  tag: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FolderVideo {
+  id: string;
+  user_id: string;
+  folder_id: string;
+  video_id: string;
+  video_url: string;
+  video_title: string | null;
+  created_at: string;
+}
