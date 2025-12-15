@@ -10,6 +10,7 @@ export interface Thumbnail {
 
 export interface ThumbnailResponse {
   videoId: string;
+  videoTitle: string;
   thumbnails: Thumbnail[];
   total: number;
 }
