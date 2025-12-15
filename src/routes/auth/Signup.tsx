@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { validatePassword } from "@/lib/password-validator";
+import { PasswordChecklist } from "@/components/auth/PasswordChecklist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -10,19 +12,32 @@ import { Loader2 } from "lucide-react";
 export default function Signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [isSigningUp, setIsSigningUp] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { signUp, signInWithGoogle } = useAuth();
+
+    // Password Validation Logic
+    const validationResult = validatePassword(password, email);
+    const doPasswordsMatch = password === confirmPassword && password !== "";
+    const isFormValid = validationResult.valid && doPasswordsMatch && email !== "";
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSigningUp(true);
-        // Assuming password validation is handled by Supabase or we add simple checks
-        if (password.length < 6) {
-            toast.error("Password must be at least 6 characters");
-            setIsSigningUp(false);
+
+        const currentValidation = validatePassword(password, email);
+        if (!currentValidation.valid) {
+            toast.error("Please meet all password requirements.");
             return;
         }
 
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match.");
+            return;
+        }
+
+        setIsSigningUp(true);
         const { error } = await signUp({ email, password });
         if (error) {
             toast.error(error.message);
@@ -40,13 +55,13 @@ export default function Signup() {
     };
 
     return (
-        <Card className="w-full shadow-lg">
+        <Card className="w-full shadow-lg max-h-[85vh] overflow-y-auto">
             <CardHeader>
                 <CardTitle className="text-2xl text-center">Create Account</CardTitle>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
-                    <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+                    <Button type="button" variant="outline" className="w-full" onClick={handleGoogleLogin}>
                         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                             <path
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -85,17 +100,64 @@ export default function Signup() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium" htmlFor="password">Password</label>
-                        <Input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                            minLength={6}
-                        />
-                        <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c.44 0 .87-.03 1.28-.09" /><line x1="2" x2="22" y1="2" y2="22" /></svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
+                                )}
+                            </Button>
+                        </div>
+                        <PasswordChecklist validationResult={validationResult} />
                     </div>
-                    <Button type="submit" className="w-full" disabled={isSigningUp}>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium" htmlFor="confirmPassword">Confirm Password</label>
+                        <div className="relative">
+                            <Input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c.44 0 .87-.03 1.28-.09" /><line x1="2" x2="22" y1="2" y2="22" /></svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
+                                )}
+                            </Button>
+                        </div>
+                        {confirmPassword && !doPasswordsMatch && (
+                            <p className="text-xs text-destructive">Passwords do not match</p>
+                        )}
+                        {confirmPassword && doPasswordsMatch && (
+                            <p className="text-xs text-green-500">Passwords match</p>
+                        )}
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={isSigningUp || !isFormValid}>
                         {isSigningUp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Sign Up
                     </Button>
