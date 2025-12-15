@@ -49,6 +49,30 @@ export default function Home() {
                 } else {
                     toast.success(`Successfully loaded ${validData.length} video(s)!`);
                 }
+
+                // RECORD HISTORY FOR AUTHENTICATED USERS
+                if (user) {
+                    try {
+                        const historyInserts = validData.map(v => ({
+                            user_id: user.id,
+                            video_id: v.videoId,
+                            video_url: `https://youtube.com/watch?v=${v.videoId}`,
+                            video_title: v.videoTitle || `Video ${v.videoId}`
+                        }));
+
+                        const { error: historyError } = await supabase
+                            .from('user_downloads')
+                            .insert(historyInserts);
+
+                        if (historyError) {
+                            console.error("Failed to record history:", historyError);
+                            // Optional: toast.error("Could not save to history");
+                        }
+                    } catch (err) {
+                        console.error("History recording error:", err);
+                    }
+                }
+
             } else {
                 toast.info("No thumbnails found.");
             }

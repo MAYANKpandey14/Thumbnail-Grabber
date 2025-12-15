@@ -44,14 +44,14 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-12 md:py-20 text-center">
-      <motion.h1 
+      <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-4xl md:text-6xl font-bold tracking-tight mb-6"
       >
         Download <span className="text-primary">YouTube</span> Thumbnails
       </motion.h1>
-      <motion.p 
+      <motion.p
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -86,7 +86,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         layout
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -124,24 +124,21 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         </div>
 
         <div className={cn("flex gap-2", isBulk ? "justify-end px-2 pb-2" : "")}>
-           <Button 
-            size="lg" 
-            className="h-12 px-6 font-semibold"
+          <Button
+            size="lg"
+            className="h-12 px-6 font-semibold w-full md:w-auto min-w-[140px]"
             disabled={isLoading || !input}
             onClick={(e) => handleSubmit(e, false)}
           >
-            {isLoading ? <Loader2 className="animate-spin mr-2" /> : <Download className="mr-2 h-4 w-4" />}
-            {isBulk ? "Process All" : "Download All"}
-          </Button>
-           <Button 
-            variant="secondary"
-            size="lg" 
-            className="h-12 px-4"
-            disabled={isLoading || !input}
-            onClick={(e) => handleSubmit(e, true)}
-            title="Preview Only"
-          >
-            <Eye className="h-5 w-5" />
+            {isLoading ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-4 w-4" /> Grabbing...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" /> Grab
+              </>
+            )}
           </Button>
         </div>
       </motion.div>
