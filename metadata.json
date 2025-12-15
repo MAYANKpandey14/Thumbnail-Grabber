@@ -1,0 +1,5 @@
+{
+  "name": "ThumbnailGrabber",
+  "description": "A production-ready YouTube Thumbnail Downloader with Supabase authentication, storage, and history tracking.",
+  "requestFramePermissions": []
+}
