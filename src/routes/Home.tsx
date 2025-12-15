@@ -81,29 +81,18 @@ export default function Home() {
                     .upload(fileName, blob, { upsert: true });
 
                 if (!uploadError) {
-                    // 2. Insert into History
-                    const { data: dlData } = await supabase
+                    // 2. Insert into History (Minimal data)
+                    await supabase
                         .from('user_downloads')
                         .insert({
                             user_id: user.id,
                             video_id: videoId,
                             video_url: `https://youtube.com/watch?v=${videoId}`,
-                            video_title: `Video ${videoId}`, // Fallback title
-                            thumbnails: videoData ? videoData.thumbnails : []
-                        })
-                        .select()
-                        .single();
-
-                    if (dlData) {
-                        await supabase.from('saved_thumbnails').insert({
-                            user_id: user.id,
-                            download_id: dlData.id,
-                            quality: thumb.quality,
-                            image_url: thumb.url,
-                            file_path: fileName,
-                            dimensions: thumb.dimensions
+                            video_title: `Video ${videoId}`
                         });
-                    }
+
+                    // Logic for "Saved Thumbnails" is removed as we now use Folders.
+                    // Users can manually organize history into folders.
                 }
             } catch (e) {
                 console.error("Failed to track download", e);

@@ -20,7 +20,7 @@ import { useFolders } from "@/hooks/useFolders";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/hooks/useAuth";
+
 
 interface AddToFolderDialogProps {
     open: boolean;
@@ -33,30 +33,9 @@ export function AddToFolderDialog({ open, onOpenChange, video }: AddToFolderDial
     const [selectedFolderId, setSelectedFolderId] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
-    // We can't use useFolderVideos hook blindly here because it requires a folderId
-    // and we are selecting one. So we might need a separate service function or
-    // simpler, we just instantiate the hook logic or make useFolderVideos accept null.
-    // Or we refrain from using useFolderVideos hook and use Supabase direct or a new "useVideoManager" hook.
-    // But simplest is to just use useFolderVideos with the SELECTED folder ID, but that means it fetches videos which is wasteful.
-    // Better: useAddVideoToFolder hook or just direct supabase.
-    // Re-using the logic from useFolderVideos by extracting it?
-    // I'll implement a one-off "add" function here or use a specific small hook.
-
-    // Actually, useFolderVideos returns `addVideoToFolder` which is what we want.
-    // But it also fetches videos on mount.
-    // I will refactor useFolderVideos slightly or just use it and ignore the fetch.
-    // But wait, useFolderVideos requires folderId to init.
-    // Let's just do direct insertion here to save time/complexity refactoring.
-
-    // Actually, I can import the logic or duplicating it is fine for now as it's simple.
-
     const handleSave = async () => {
         if (!selectedFolderId || !video) return;
         setIsSaving(true);
-
-        // Static imports used directly
-        // I'll grab user from session or I should pass it.
-        // Let's assume user is authed.
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
