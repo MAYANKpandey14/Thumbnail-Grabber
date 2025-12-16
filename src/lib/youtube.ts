@@ -1,6 +1,6 @@
 import { extractVideoId } from "@/utils/extractVideoId";
 import { Thumbnail, ThumbnailResponse } from "@/types";
-import { getThumbnailUrl } from "@/lib/youtube/thumbnailUrls";
+import { getThumbnailUrl } from "@/utils/thumbnailUrls";
 
 export const getVideoTitle = async (url: string): Promise<string> => {
     try {

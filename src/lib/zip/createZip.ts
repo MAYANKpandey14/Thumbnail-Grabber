@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { ParsedCSVRow } from '@/lib/csv/parseCsv';
-import { getThumbnailUrl } from '@/lib/youtube/thumbnailUrls';
+import { getThumbnailUrl } from "@/utils/thumbnailUrls";
 
 interface ZipProgress {
     current: number;
@@ -55,7 +55,7 @@ export async function createThumbnailZip(
         if (blob) {
             // Filename: {title}-{id}.jpg or {id}.jpg
             const safeTitle = row.title ? row.title.replace(/[^a-zA-Z0-9]/g, '_') : 'video';
-            const filename = `${safeTitle}-${row.videoId}.jpg`;
+            const filename = `${safeTitle} -${row.videoId}.jpg`;
 
             // Organize by folder if present?
             if (row.folder) {

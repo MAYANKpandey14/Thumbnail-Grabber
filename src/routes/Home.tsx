@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import HeroInput from "@/components/HeroInput";
 import ThumbnailGrid from "@/components/ThumbnailGrid";
@@ -6,16 +6,16 @@ import { Thumbnail, ThumbnailResponse } from "@/types";
 import { toast } from "sonner";
 import { getThumbnails } from "@/lib/youtube";
 import { useGuestLimit } from "@/hooks/useGuestLimit";
-import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useDownloads } from "@/hooks/useDownloads";
 
 export default function Home() {
     const [results, setResults] = useState<ThumbnailResponse[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Use useAuth hook instead of local state + createClient
     const { user } = useAuth();
     const { incrementCount, remaining } = useGuestLimit(!!user);
+    const { recordSearchHistory, saveDownloadToStorage } = useDownloads();
 
     const handleSearch = async (urls: string[], previewOnly: boolean) => {
         if (urls.length === 0) return;
@@ -51,27 +51,8 @@ export default function Home() {
                 }
 
                 // RECORD HISTORY FOR AUTHENTICATED USERS
-                if (user) {
-                    try {
-                        const historyInserts = validData.map(v => ({
-                            user_id: user.id,
-                            video_id: v.videoId,
-                            video_url: `https://youtube.com/watch?v=${v.videoId}`,
-                            video_title: v.videoTitle || `Video ${v.videoId}`
-                        }));
-
-                        const { error: historyError } = await supabase
-                            .from('user_downloads')
-                            .insert(historyInserts);
-
-                        if (historyError) {
-                            console.error("Failed to record history:", historyError);
-                            // Optional: toast.error("Could not save to history");
-                        }
-                    } catch (err) {
-                        console.error("History recording error:", err);
-                    }
-                }
+                // Use hook
+                await recordSearchHistory(validData);
 
             } else {
                 toast.info("No thumbnails found.");
@@ -84,45 +65,18 @@ export default function Home() {
         }
     };
 
-    const checkDownloadAllowed = (): boolean => {
+    const checkDownloadAllowed = useCallback((): boolean => {
         if (!incrementCount()) {
             toast.error("Daily limit reached. Login for more!");
             return false;
         }
         return true;
-    };
+    }, [incrementCount]);
 
-    const handleDownloadComplete = async (blob: Blob, thumb: Thumbnail, videoId: string) => {
-        // If user is logged in, save to Supabase
-        if (user) {
-            try {
-                const videoData = results.find(r => r.videoId === videoId);
-
-                // 1. Upload to Storage
-                const fileName = `${user.id}/${videoId}/${thumb.quality}.jpg`;
-                const { error: uploadError } = await supabase.storage
-                    .from('thumbnails')
-                    .upload(fileName, blob, { upsert: true });
-
-                if (!uploadError) {
-                    // 2. Insert into History (Minimal data)
-                    await supabase
-                        .from('user_downloads')
-                        .insert({
-                            user_id: user.id,
-                            video_id: videoId,
-                            video_url: `https://youtube.com/watch?v=${videoId}`,
-                            video_title: `Video ${videoId}`
-                        });
-
-                    // Logic for "Saved Thumbnails" is removed as we now use Folders.
-                    // Users can manually organize history into folders.
-                }
-            } catch (e) {
-                console.error("Failed to track download", e);
-            }
-        }
-    };
+    const handleDownloadComplete = useCallback(async (blob: Blob, thumb: Thumbnail, videoId: string) => {
+        const videoData = results.find(r => r.videoId === videoId);
+        await saveDownloadToStorage(blob, thumb, videoId, videoData?.videoTitle);
+    }, [results, saveDownloadToStorage]);
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -149,3 +103,4 @@ export default function Home() {
         </div>
     );
 }
+

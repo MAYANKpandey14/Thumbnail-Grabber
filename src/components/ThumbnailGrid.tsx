@@ -59,7 +59,7 @@ interface ThumbnailCardProps {
   onDownloadComplete: (blob: Blob, thumb: Thumbnail, videoId: string) => Promise<void>;
 }
 
-const ThumbnailCard: React.FC<ThumbnailCardProps> = ({
+const ThumbnailCard = React.memo<ThumbnailCardProps>(({
   thumb,
   videoId,
   checkDownloadAllowed,
@@ -237,7 +237,7 @@ const ThumbnailCard: React.FC<ThumbnailCardProps> = ({
       </Card>
     </motion.div>
   );
-};
+});
 
 export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloadComplete }: ThumbnailGridProps) {
   const [isZipping, setIsZipping] = useState(false);

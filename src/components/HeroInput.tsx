@@ -10,8 +10,7 @@ import { cn } from "@/lib/utils";
 import { extractVideoId } from "@/utils/extractVideoId";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { parseCsvFile } from "@/lib/csv/parseCsv";
-import { toast } from "sonner";
+import { useBulkCsv } from "@/hooks/useBulkCsv";
 
 interface HeroInputProps {
   onSearch: (urls: string[], previewOnly: boolean) => void;
@@ -24,6 +23,15 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isBulk, setIsBulk] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  const handleUrlsParsed = (urls: string[]) => {
+    setInput(prev => {
+      const existing = prev ? prev + '\n' : '';
+      return existing + urls.join('\n');
+    });
+  };
+
+  const { processFile, isProcessing } = useBulkCsv(handleUrlsParsed);
 
   const handleSubmit = (e: React.FormEvent, previewOnly: boolean) => {
     e.preventDefault();
@@ -58,34 +66,6 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
     const files = e.target.files;
     if (files && files.length > 0) {
       processFile(files[0]);
-    }
-  };
-
-  const processFile = async (file: File) => {
-    if (file.type === "text/csv" || file.name.endsWith(".csv") || file.type === "application/vnd.ms-excel") {
-      try {
-        toast.info("Parsing CSV...");
-        const result = await parseCsvFile(file);
-
-        if (result.validCount > 0) {
-          const urls = result.rows
-            .filter(r => r.status === 'valid' && r.videoId)
-            .map(r => `https://www.youtube.com/watch?v=${r.videoId}`);
-
-          setInput(prev => {
-            const existing = prev ? prev + '\n' : '';
-            return existing + urls.join('\n');
-          });
-          toast.success(`Added ${result.validCount} URLs from CSV`);
-        } else {
-          toast.warning("No valid YouTube URLs found in CSV");
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to parse CSV file");
-      }
-    } else {
-      toast.error("Please select a valid .csv file");
     }
   };
 
@@ -225,7 +205,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
                         onBlur={() => setIsFocused(false)}
                         placeholder="Paste YouTube URLs ( one per line ), Upload or Drag and Drop .csv file"
                         className="min-h-[80px] w-full text-base border-none shadow-none focus-visible:ring-0 resize-none p-3 pl-10 bg-muted/10 rounded-lg placeholder:text-muted-foreground/60 focus:bg-muted/20 transition-colors"
-                        disabled={isLoading}
+                        disabled={isLoading || isProcessing}
                       />
                     </div>
 
@@ -239,7 +219,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
                     >
                       <div className="flex flex-col items-center justify-center text-center gap-2">
                         <div className="p-3 bg-primary/10 rounded-full group-hover:scale-110 transition-transform duration-300">
-                          <CloudUpload className="w-6 h-6 text-primary" />
+                          {isProcessing ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <CloudUpload className="w-6 h-6 text-primary" />}
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm font-semibold text-foreground/80">
@@ -285,7 +265,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
                 "font-semibold shadow-lg transition-all hover:scale-105 active:scale-95",
                 isBulk ? "w-full mt-2 rounded-lg" : "rounded-full h-11 px-6"
               )}
-              disabled={isLoading || !input}
+              disabled={isLoading || !input || isProcessing}
               onClick={(e) => handleSubmit(e, false)}
             >
               {isBulk ? null : (
@@ -304,10 +284,10 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
             <Button
               size="lg"
               className="w-full font-semibold shadow-lg h-12 rounded-lg"
-              disabled={isLoading || !input}
+              disabled={isLoading || !input || isProcessing}
               onClick={(e) => handleSubmit(e, false)}
             >
-              {isLoading ? (
+              {isLoading || isProcessing ? (
                 <>
                   <Loader2 className="animate-spin mr-2 h-4 w-4" /> Processing...
                 </>
