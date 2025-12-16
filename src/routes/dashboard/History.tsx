@@ -85,7 +85,7 @@ export default function History() {
                                     <Button
                                         variant="secondary"
                                         size="sm"
-                                        onClick={() => window.open(`/?url=${encodeURIComponent(item.video_url)}`, '_blank')} // Simple hack to open in Home for now, can refine later
+                                        onClick={() => window.open(`https://img.youtube.com/vi/${item.video_id}/maxresdefault.jpg`, '_blank')} // Simple hack to open in Home for now, can refine later
                                     >
                                         View
                                     </Button>

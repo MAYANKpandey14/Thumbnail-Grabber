@@ -1,5 +1,6 @@
-import { extractVideoId } from "./utils";
+import { extractVideoId } from "@/utils/extractVideoId";
 import { Thumbnail, ThumbnailResponse } from "@/types";
+import { getThumbnailUrl } from "@/lib/youtube/thumbnailUrls";
 
 export const getVideoTitle = async (url: string): Promise<string> => {
     try {
@@ -20,16 +21,12 @@ export const getThumbnails = async (url: string): Promise<ThumbnailResponse | nu
 
     const qualities = [
         { quality: 'maxres', suffix: 'maxresdefault' },
-        { quality: 'sd', suffix: 'sddefault' },
-        { quality: 'hq', suffix: 'hqdefault' },
-        { quality: 'mq', suffix: 'mqdefault' },
-        { quality: 'default', suffix: 'default' },
     ] as const;
 
     const thumbnails: Thumbnail[] = qualities.map((q) => ({
         quality: q.quality,
-        url: `https://img.youtube.com/vi/${videoId}/${q.suffix}.jpg`,
-        dimensions: 'unknown',
+        url: getThumbnailUrl(videoId, q.suffix),
+        dimensions: '1280x720',
     }));
 
     return {

@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { extractVideoId } from "@/lib/utils";
+import { extractVideoId } from "@/utils/extractVideoId";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { parseCsvFile } from "@/lib/csv/parseCsv";
+import { toast } from "sonner";
 
 interface HeroInputProps {
   onSearch: (urls: string[], previewOnly: boolean) => void;
@@ -15,9 +19,11 @@ interface HeroInputProps {
 }
 
 export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
+  const { user } = useAuth();
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [isBulk, setIsBulk] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleSubmit = (e: React.FormEvent, previewOnly: boolean) => {
     e.preventDefault();
@@ -39,6 +45,58 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
 
     if (urls.length > 0) {
       onSearch(urls, previewOnly);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isBulk && user) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (!isBulk || !user) return;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type === "text/csv" || file.name.endsWith(".csv") || file.type === "application/vnd.ms-excel") {
+        try {
+          toast.info("Parsing CSV...");
+          const result = await parseCsvFile(file);
+
+          if (result.validCount > 0) {
+            const urls = result.rows
+              .filter(r => r.status === 'valid' && r.videoId)
+              .map(r => `https://www.youtube.com/watch?v=${r.videoId}`);
+
+            setInput(prev => {
+              const existing = prev ? prev + '\n' : '';
+              return existing + urls.join('\n');
+            });
+            toast.success(`Added ${result.validCount} URLs from CSV`);
+          } else {
+            toast.warning("No valid YouTube URLs found in CSV");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to parse CSV file");
+        }
+      } else {
+        toast.error("Please drop a valid .csv file");
+      }
     }
   };
 
@@ -93,20 +151,50 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         transition={{ delay: 0.2 }}
         className={cn(
           "relative flex flex-col gap-2 p-2 rounded-xl border bg-background shadow-lg transition-all duration-300",
-          isFocused ? "ring-2 ring-primary border-primary" : ""
+          isFocused ? "ring-2 ring-primary border-primary" : "",
+          isDragging ? "ring-2 ring-primary border-primary bg-primary/5" : ""
         )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         <div className="relative flex-1 text-left">
           {isBulk ? (
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="Paste multiple YouTube URLs here (one per line)..."
-              className="min-h-[120px] text-base border-none shadow-none focus-visible:ring-0 resize-none p-3"
-              disabled={isLoading}
-            />
+            !user ? (
+              <div className="min-h-[120px] flex flex-col items-center justify-center space-y-3 p-4 bg-muted/20 rounded-lg border border-dashed text-center">
+                <div className="text-sm font-medium text-muted-foreground">
+                  Bulk Mode is available for logged-in users only.
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="default" size="sm" asChild>
+                    <Link to="/auth/login">Login</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/auth/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder="Paste multiple YouTube URLs here (one per line) or drop a .csv file"
+                  className="min-h-[120px] text-base border-none shadow-none focus-visible:ring-0 resize-none p-3 bg-transparent"
+                  disabled={isLoading}
+                />
+                {isDragging && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg border-2 border-primary border-dashed z-10">
+                    <div className="flex flex-col items-center text-primary">
+                      <Download className="w-8 h-8 mb-2 animate-bounce" />
+                      <span className="font-semibold">Drop CSV file here</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
           ) : (
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -123,24 +211,26 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
           )}
         </div>
 
-        <div className={cn("flex gap-2", isBulk ? "justify-end px-2 pb-2" : "")}>
-          <Button
-            size="lg"
-            className="h-12 px-6 font-semibold w-full md:w-auto min-w-[140px]"
-            disabled={isLoading || !input}
-            onClick={(e) => handleSubmit(e, false)}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin mr-2 h-4 w-4" /> Grabbing...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" /> Grab
-              </>
-            )}
-          </Button>
-        </div>
+        {(!isBulk || user) && (
+          <div className={cn("flex gap-2", isBulk ? "justify-end px-2 pb-2" : "")}>
+            <Button
+              size="lg"
+              className="h-12 px-6 font-semibold w-full md:w-auto min-w-[140px]"
+              disabled={isLoading || !input}
+              onClick={(e) => handleSubmit(e, false)}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" /> Grabbing...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" /> Grab
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </motion.div>
     </div>
   );
