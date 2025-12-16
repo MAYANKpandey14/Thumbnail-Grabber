@@ -105,11 +105,11 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-12 md:py-20 text-center">
+    <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-20 text-center">
       <motion.h1
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-4xl md:text-6xl font-bold tracking-tight mb-6"
+        className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 md:mb-6"
       >
         Download <span className="text-primary">YouTube</span> Thumbnails
       </motion.h1>
@@ -117,7 +117,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
+        className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto"
       >
         Get high-quality thumbnails in FHD. Fast, free, and secure.
       </motion.p>
@@ -260,10 +260,10 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         {(!isBulk || user) && (
           <div className={cn("transition-all duration-300", isBulk ? "hidden" : "absolute right-2 top-1/2 -translate-y-1/2")}>
             <Button
-              size={isBulk ? "default" : "lg"}
+              size="default"
               className={cn(
                 "font-semibold shadow-lg transition-all hover:scale-105 active:scale-95",
-                isBulk ? "w-full mt-2 rounded-lg" : "rounded-full h-11 px-6"
+                "rounded-full h-9 px-4 md:h-10 md:px-6"
               )}
               disabled={isLoading || !input || isProcessing}
               onClick={(e) => handleSubmit(e, false)}
@@ -282,8 +282,8 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         {isBulk && user && (
           <div className="px-2 pb-2">
             <Button
-              size="lg"
-              className="w-full font-semibold shadow-lg h-12 rounded-lg"
+              size="default"
+              className="w-full font-semibold shadow-lg h-10 md:h-12 rounded-lg"
               disabled={isLoading || !input || isProcessing}
               onClick={(e) => handleSubmit(e, false)}
             >

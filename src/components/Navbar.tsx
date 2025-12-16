@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, LogOut } from "lucide-react";
+import { LayoutGrid, LogOut, LogIn, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -31,24 +31,24 @@ export default function Navbar() {
   return (
     <>
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-14 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2 font-bold text-lg text-primary font-heading">
+        <div className="container flex h-12 md:h-14 items-center justify-between px-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link to="/" className="flex items-center gap-1.5 md:gap-2 font-bold text-base md:text-lg text-primary font-heading">
               <span>Thumbnail Grabber</span>
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 md:gap-3">
             {user ? (
               <>
-                <Button variant="ghost" asChild className={location.pathname === "/dashboard" ? "bg-accent" : ""}>
+                <Button variant="ghost" size="sm" asChild className={location.pathname === "/dashboard" ? "bg-accent" : ""}>
                   <Link to="/dashboard">
-                    <LayoutGrid className="w-4 h-4 mr-2" />
+                    <LayoutGrid className="w-4 h-4" />
                     <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                 </Button>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs md:text-sm">
                     {user.email?.[0].toUpperCase()}
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => setShowLogoutConfirm(true)}>
@@ -57,12 +57,18 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" asChild>
-                  <Link to="/auth/login">Login</Link>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/auth/login">
+                    <LogIn className="w-4 h-4" />
+                    <span className="hidden sm:inline">Login</span>
+                  </Link>
                 </Button>
-                <Button asChild>
-                  <Link to="/auth/signup">Sign Up</Link>
+                <Button size="sm" asChild>
+                  <Link to="/auth/signup">
+                    <UserPlus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sign Up</span>
+                  </Link>
                 </Button>
               </div>
             )}
