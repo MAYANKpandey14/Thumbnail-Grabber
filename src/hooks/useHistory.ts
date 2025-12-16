@@ -70,5 +70,22 @@ export function useHistory(filter: HistoryFilter = 'day') {
         fetchHistory();
     }, [user, filter]);
 
-    return { history, loading };
+    const deleteFromHistory = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from('user_downloads')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setHistory(prev => prev.filter(item => item.id !== id));
+            toast.success("Item deleted from history");
+        } catch (err: any) {
+            console.error("Error deleting item:", err);
+            toast.error("Failed to delete item");
+        }
+    };
+
+    return { history, loading, deleteFromHistory };
 }
