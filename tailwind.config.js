@@ -77,6 +77,5 @@ export default {
       },
     },
   },
-},
-plugins: [],
+  plugins: [],
 };

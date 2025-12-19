@@ -301,7 +301,7 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
             Results
-            <Badge variant="secondary">{results.length} {results.length > 1 ? "videos" : "video"}</Badge>
+            <Badge variant="secondary">{results.length} {results.length === 1 ? "Video" : "Videos"}</Badge>
           </h2>
         </div>
         <Button onClick={downloadAllZip} disabled={isZipping} className="shadow-md">
