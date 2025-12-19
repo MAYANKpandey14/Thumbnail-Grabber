@@ -21,6 +21,10 @@ export const getThumbnails = async (url: string): Promise<ThumbnailResponse | nu
 
     const qualities = [
         { quality: 'maxres', suffix: 'maxresdefault' },
+        { quality: 'hq', suffix: 'hqdefault' },
+        { quality: 'mq', suffix: 'mqdefault' },
+        { quality: 'sd', suffix: 'sddefault' },
+        { quality: 'default', suffix: 'default' },
     ] as const;
 
     const thumbnails: Thumbnail[] = qualities.map((q) => ({

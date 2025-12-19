@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import HeroInput from "@/components/HeroInput";
 import ThumbnailGrid from "@/components/ThumbnailGrid";
+import SEOContent from "@/components/SEOContent";
+import FAQ from "@/components/FAQ";
 import { Thumbnail, ThumbnailResponse } from "@/types";
 import { toast } from "sonner";
 import { getThumbnails } from "@/lib/youtube";
@@ -98,6 +100,11 @@ export default function Home() {
                             onDownloadComplete={handleDownloadComplete}
                         />
                     )}
+
+                    <div className="mt-20">
+                        <SEOContent />
+                        <FAQ />
+                    </div>
                 </div>
             </main>
         </div>

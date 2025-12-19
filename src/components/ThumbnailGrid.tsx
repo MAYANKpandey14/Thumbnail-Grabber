@@ -301,7 +301,7 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
             Results
-            <Badge variant="secondary">{results.length} Videos</Badge>
+            <Badge variant="secondary">{results.length} {results.length > 1 ? "videos" : "video"}</Badge>
           </h2>
         </div>
         <Button onClick={downloadAllZip} disabled={isZipping} className="shadow-md">
@@ -336,7 +336,7 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
             animate="show"
             className="grid grid-cols-1 md:grid-cols-2 gap-8"
           >
-            {videoData.thumbnails.filter(t => t.quality === 'maxres').map((thumb) => (
+            {videoData.thumbnails.map((thumb) => (
               <ThumbnailCard
                 key={`${videoData.videoId}-${thumb.quality}`}
                 thumb={thumb}
