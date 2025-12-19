@@ -105,7 +105,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-20 text-center">
+    <div className="w-full max-w-[95%] sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-20 text-center">
       <motion.h1
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -161,9 +161,10 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         layout
         transition={{ layout: { duration: 0.3, type: "spring", bounce: 0 } }}
         className={cn(
-          "relative flex flex-col gap-2 p-2 rounded-xl border bg-background shadow-lg transition-shadow duration-300",
-          isFocused ? "ring-2 ring-primary border-primary" : "",
-          isDragging ? "ring-2 ring-primary border-primary bg-primary/5" : ""
+          "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300",
+          "border-red-500", // Single red border as requested
+          isFocused ? "shadow-red-500/20 shadow-xl" : "", // Optional: specific glow on focus instead of ring
+          isDragging ? "bg-red-500/5" : ""
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
