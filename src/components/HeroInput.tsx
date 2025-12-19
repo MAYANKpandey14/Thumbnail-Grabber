@@ -205,7 +205,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         placeholder="Paste YouTube URLs ( one per line ), Upload or Drag and Drop .csv file"
-                        className="min-h-[80px] w-full text-base border-none shadow-none focus-visible:ring-0 resize-none p-3 pl-10 bg-muted/10 rounded-lg placeholder:text-muted-foreground/60 focus:bg-muted/20 transition-colors"
+                        className="min-h-[80px] w-full text-base border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none resize-none p-3 pl-10 bg-muted/10 rounded-lg placeholder:text-muted-foreground/60 focus:bg-muted/20 transition-colors"
                         disabled={isLoading || isProcessing}
                       />
                     </div>
@@ -250,7 +250,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   placeholder="Paste YouTube URL here..."
-                  className="pl-12 h-full text-lg border-none shadow-none focus-visible:ring-0 w-full bg-transparent placeholder:text-muted-foreground/50"
+                  className="pl-12 pr-[100px] md:pr-[140px] h-full text-base md:text-lg border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none w-full bg-transparent placeholder:text-muted-foreground/50"
                   disabled={isLoading}
                 />
               </motion.div>
@@ -264,7 +264,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
               size="default"
               className={cn(
                 "font-semibold shadow-lg transition-all hover:scale-105 active:scale-95",
-                "rounded-full h-9 px-4 md:h-10 md:px-6"
+                "rounded-full h-8 px-3 text-xs sm:h-9 sm:px-4 md:h-10 md:px-6 md:text-sm"
               )}
               disabled={isLoading || !input || isProcessing}
               onClick={(e) => handleSubmit(e, false)}
