@@ -159,28 +159,22 @@ const ThumbnailCard = React.memo<ThumbnailCardProps>(({
                         <Eye className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[90vw] max-h-[90vh] w-fit p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
+                    <DialogContent className="max-w-[95vw] md:max-w-5xl w-full p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
                       <DialogTitle className="sr-only">Preview {thumb.quality}</DialogTitle>
-                      <div className="relative">
+                      <div className="relative w-full flex justify-center">
                         <img
                           src={thumb.url}
                           alt={`Preview ${thumb.quality}`}
-                          className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                          className="w-full h-auto max-h-[90vh] object-contain rounded-lg shadow-2xl bg-black/50"
                         />
-                        <DialogClose className="absolute -top-4 -right-4 bg-white text-black rounded-full p-1 opacity-70 hover:opacity-100 transition-opacity">
+                        <DialogClose className="absolute top-2 right-2 md:-top-4 md:-right-4 bg-white text-black rounded-full p-1 opacity-70 hover:opacity-100 transition-opacity z-50">
                           <X className="w-4 h-4" />
                         </DialogClose>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="flex gap-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
-                  <Button size="sm" variant="ghost" className="text-white hover:text-white hover:bg-white/20 h-8 px-2 text-xs" asChild>
-                    <a href={thumb.url} target="_blank" rel="noopener noreferrer">
-                      Open Link <ExternalLink className="w-3 h-3 ml-1" />
-                    </a>
-                  </Button>
-                </div>
+
               </>
             )}
 
