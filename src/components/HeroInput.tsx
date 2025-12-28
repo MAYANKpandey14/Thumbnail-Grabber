@@ -20,6 +20,7 @@ interface HeroInputProps {
 export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
   const { user } = useAuth();
   const [input, setInput] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isBulk, setIsBulk] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -33,27 +34,44 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
 
   const { processFile, isProcessing } = useBulkCsv(handleUrlsParsed);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInput(val);
+
+    if (!val.trim()) {
+      setError(null);
+      return;
+    }
+
+    const videoId = extractVideoId(val);
+    if (videoId) {
+      setError(null);
+      onSearch([val], false);
+    } else {
+      // Only show error if input is substantial to avoid annoying typing feedback
+      if (val.length > 20) {
+        setError("Invalid YouTube URL");
+      } else {
+        setError(null);
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent, previewOnly: boolean) => {
     e.preventDefault();
-    if (!input.trim()) return;
-
-    let urls: string[] = [];
-
     if (isBulk) {
+      if (!input.trim()) return;
       // Split by newline, comma, or space
-      urls = input
+      const urls = input
         .split(/[\n, ]+/)
         .map(u => u.trim())
         .filter(u => u.length > 0 && extractVideoId(u) !== null); // Basic validation
-    } else {
-      if (extractVideoId(input)) {
-        urls = [input.trim()];
+
+      if (urls.length > 0) {
+        onSearch(urls, previewOnly);
       }
     }
-
-    if (urls.length > 0) {
-      onSearch(urls, previewOnly);
-    }
+    // Single mode submit is now handled by onChange, but keep this if needed for Enter key or bulk
   };
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -162,9 +180,9 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         transition={{ layout: { duration: 0.3, type: "spring", bounce: 0 } }}
         className={cn(
           "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300",
-          "border-red-500", // Single red border as requested
-          isFocused ? "shadow-red-500/20 shadow-xl" : "", // Optional: specific glow on focus instead of ring
-          isDragging ? "bg-red-500/5" : ""
+          error ? "border-red-500" : (isFocused ? "border-primary/50" : "border-border"),
+          isFocused ? "shadow-primary/20 shadow-xl" : "",
+          isDragging ? "bg-primary/5" : ""
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -239,45 +257,31 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
               <motion.div
                 key="single-mode"
                 {...fadeInAnimation}
-                className="relative h-[60px] flex items-center"
+                className="relative flex flex-col"
               >
-                <div className="absolute left-4 text-muted-foreground/50">
-                  <Search className="w-5 h-5" />
+                <div className="relative h-[60px] flex items-center">
+                  <div className="absolute left-4 text-muted-foreground/50">
+                    <Search className="w-5 h-5" />
+                  </div>
+                  <Input
+                    value={input}
+                    onChange={handleInputChange}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder="Paste YouTube URL here..."
+                    className="pl-12 pr-4 h-full text-base md:text-lg border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none w-full bg-transparent placeholder:text-muted-foreground/50"
+                    disabled={isLoading}
+                  />
                 </div>
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  placeholder="Paste YouTube URL here..."
-                  className="pl-12 pr-[100px] md:pr-[140px] h-full text-base md:text-lg border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none w-full bg-transparent placeholder:text-muted-foreground/50"
-                  disabled={isLoading}
-                />
+                {error && (
+                  <div className="px-4 pb-2 text-sm text-red-500 font-medium text-left bg-red-50/50 rounded-b-xl animate-in slide-in-from-top-1">
+                    {error}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
-        {(!isBulk || user) && (
-          <div className={cn("transition-all duration-300", isBulk ? "hidden" : "absolute right-2 top-1/2 -translate-y-1/2")}>
-            <Button
-              size="default"
-              className={cn(
-                "font-semibold shadow-lg transition-all hover:scale-105 active:scale-95",
-                "rounded-full h-8 px-3 text-xs sm:h-9 sm:px-4 md:h-10 md:px-6 md:text-sm"
-              )}
-              disabled={isLoading || !input || isProcessing}
-              onClick={(e) => handleSubmit(e, false)}
-            >
-              {isBulk ? null : (
-                <>
-                  {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Download className="mr-2 h-4 w-4" />}
-                  Grab
-                </>
-              )}
-            </Button>
-          </div>
-        )}
 
         {/* Bulk Grab Button at Bottom */}
         {isBulk && user && (
