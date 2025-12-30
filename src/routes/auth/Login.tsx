@@ -12,7 +12,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
-    const { signInWithPassword, signInWithGoogle, user } = useAuth();
+    const { signInWithPassword, signInWithGoogle, user, loading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -20,10 +20,10 @@ export default function Login() {
 
     // If already logged in, redirect
     useEffect(() => {
-        if (user) {
+        if (user && !loading) {
             navigate(from, { replace: true });
         }
-    }, [user, navigate, from]);
+    }, [user, loading, navigate, from]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

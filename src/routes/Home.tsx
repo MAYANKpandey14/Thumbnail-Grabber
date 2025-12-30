@@ -10,6 +10,7 @@ import { getThumbnails } from "@/lib/youtube";
 import { useGuestLimit } from "@/hooks/useGuestLimit";
 import { useAuth } from "@/hooks/useAuth";
 import { useDownloads } from "@/hooks/useDownloads";
+import { DotScreenShader } from "@/components/ui/dot-shader-background";
 
 export default function Home() {
     const [results, setResults] = useState<ThumbnailResponse[]>([]);
@@ -83,27 +84,34 @@ export default function Home() {
     return (
         <div className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-1 bg-gradient-to-b from-red-50/50 to-background dark:from-red-950/20 dark:to-background">
-                <HeroInput onSearch={handleSearch} isLoading={loading} />
+            <main className="flex-1 relative overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <DotScreenShader />
+                </div>
+                <div className="relative z-10 pointer-events-none">
+                    <div className="pointer-events-auto">
+                        <HeroInput onSearch={handleSearch} isLoading={loading} />
+                    </div>
 
-                <div className="container px-4 pb-20">
-                    {!user && (
-                        <div className="text-center mb-8 text-sm text-muted-foreground">
-                            Guest Downloads Remaining: <span className="font-bold text-primary">{remaining}</span> / 10
+                    <div className="container px-4 pb-20 pointer-events-auto">
+                        {!user && (
+                            <div className="text-center mb-8 text-sm text-muted-foreground">
+                                Guest Downloads Remaining: <span className="font-bold text-primary">{remaining}</span> / 10
+                            </div>
+                        )}
+
+                        {results.length > 0 && (
+                            <ThumbnailGrid
+                                results={results}
+                                checkDownloadAllowed={checkDownloadAllowed}
+                                onDownloadComplete={handleDownloadComplete}
+                            />
+                        )}
+
+                        <div className="mt-20">
+                            <SEOContent />
+                            <FAQ />
                         </div>
-                    )}
-
-                    {results.length > 0 && (
-                        <ThumbnailGrid
-                            results={results}
-                            checkDownloadAllowed={checkDownloadAllowed}
-                            onDownloadComplete={handleDownloadComplete}
-                        />
-                    )}
-
-                    <div className="mt-20">
-                        <SEOContent />
-                        <FAQ />
                     </div>
                 </div>
             </main>

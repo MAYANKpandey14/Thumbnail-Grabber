@@ -8,6 +8,8 @@ import App from './App';
 // The existing project has globals.css in root.
 import "../globals.css";
 
+import { ThemeProvider } from "./components/theme-provider";
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
@@ -15,10 +17,12 @@ if (rootElement) {
     root.render(
         <React.StrictMode>
             <AuthProvider>
-                <BrowserRouter>
-                    <App />
-                    <Toaster position="top-center" richColors />
-                </BrowserRouter>
+                <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+                    <BrowserRouter>
+                        <App />
+                        <Toaster position="top-center" richColors />
+                    </BrowserRouter>
+                </ThemeProvider>
             </AuthProvider>
         </React.StrictMode>
     );
