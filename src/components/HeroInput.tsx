@@ -135,7 +135,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto"
+        className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto pointer-events-auto"
       >
         Get high-quality thumbnails in FHD. Fast, free, and secure.
       </motion.p>
@@ -143,7 +143,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex justify-center mb-4"
+        className="flex justify-center mb-4 pointer-events-auto"
       >
         <div className="bg-muted p-1 rounded-lg inline-flex">
           <Button
@@ -179,7 +179,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         layout
         transition={{ layout: { duration: 0.3, type: "spring", bounce: 0 } }}
         className={cn(
-          "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300",
+          "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300 pointer-events-auto",
           error ? "border-red-500" : (isFocused ? "border-primary/50" : "border-border"),
           isFocused ? "shadow-primary/20 shadow-xl" : "",
           isDragging ? "bg-primary/5" : ""
@@ -285,7 +285,7 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
 
         {/* Bulk Grab Button at Bottom */}
         {isBulk && user && (
-          <div className="px-2 pb-2">
+          <div className="px-2 pb-2 pointer-events-auto">
             <Button
               size="default"
               className="w-full font-semibold shadow-lg h-10 md:h-12 rounded-lg"

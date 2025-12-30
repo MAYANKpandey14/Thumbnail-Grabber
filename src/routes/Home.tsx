@@ -84,34 +84,36 @@ export default function Home() {
     return (
         <div className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-1 relative overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                    <DotScreenShader />
-                </div>
-                <div className="relative z-10 pointer-events-none">
-                    <div className="pointer-events-auto">
+            <main className="flex-1">
+                {/* Hero Section with Shader Background */}
+                <div className="relative w-full overflow-hidden">
+                    <div className="absolute inset-0 z-0 pointer-events-auto">
+                        <DotScreenShader />
+                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                    </div>
+                    <div className="relative z-10 pointer-events-none">
                         <HeroInput onSearch={handleSearch} isLoading={loading} />
                     </div>
+                </div>
 
-                    <div className="container px-4 pb-20 pointer-events-auto">
-                        {!user && (
-                            <div className="text-center mb-8 text-sm text-muted-foreground">
-                                Guest Downloads Remaining: <span className="font-bold text-primary">{remaining}</span> / 10
-                            </div>
-                        )}
-
-                        {results.length > 0 && (
-                            <ThumbnailGrid
-                                results={results}
-                                checkDownloadAllowed={checkDownloadAllowed}
-                                onDownloadComplete={handleDownloadComplete}
-                            />
-                        )}
-
-                        <div className="mt-20">
-                            <SEOContent />
-                            <FAQ />
+                <div className="container px-4 pb-20 pointer-events-auto">
+                    {!user && (
+                        <div className="text-center mb-8 text-sm text-muted-foreground">
+                            Guest Downloads Remaining: <span className="font-bold text-primary">{remaining}</span> / 10
                         </div>
+                    )}
+
+                    {results.length > 0 && (
+                        <ThumbnailGrid
+                            results={results}
+                            checkDownloadAllowed={checkDownloadAllowed}
+                            onDownloadComplete={handleDownloadComplete}
+                        />
+                    )}
+
+                    <div className="mt-20">
+                        <SEOContent />
+                        <FAQ />
                     </div>
                 </div>
             </main>

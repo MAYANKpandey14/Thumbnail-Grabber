@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -40,7 +39,6 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-3">
-            <ThemeToggle />
             {user ? (
               <>
                 <Button variant="ghost" size="sm" asChild className={location.pathname === "/dashboard" ? "bg-accent" : ""}>

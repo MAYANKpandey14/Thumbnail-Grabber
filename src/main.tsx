@@ -17,7 +17,7 @@ if (rootElement) {
     root.render(
         <React.StrictMode>
             <AuthProvider>
-                <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+                <ThemeProvider defaultTheme="light" disableTransitionOnChange>
                     <BrowserRouter>
                         <App />
                         <Toaster position="top-center" richColors />
