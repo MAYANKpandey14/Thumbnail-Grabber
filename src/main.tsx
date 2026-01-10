@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import App from './App';
+import { ZipSettingsProvider } from './context/ZipSettingsContext';
 // Import globals css from root (since we are in src/)
 // The existing project has globals.css in root.
 import "../globals.css";
@@ -18,10 +19,12 @@ if (rootElement) {
         <React.StrictMode>
             <AuthProvider>
                 <ThemeProvider defaultTheme="light" disableTransitionOnChange>
-                    <BrowserRouter>
-                        <App />
-                        <Toaster position="top-center" richColors />
-                    </BrowserRouter>
+                    <ZipSettingsProvider>
+                        <BrowserRouter>
+                            <App />
+                            <Toaster position="top-center" richColors />
+                        </BrowserRouter>
+                    </ZipSettingsProvider>
                 </ThemeProvider>
             </AuthProvider>
         </React.StrictMode>

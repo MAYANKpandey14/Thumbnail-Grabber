@@ -55,12 +55,18 @@ export default function Navbar() {
                         {(() => {
                           const meta = user.user_metadata || {};
                           const name = meta.full_name || meta.name;
-                          if (name) {
-                            const parts = name.trim().split(" ");
-                            if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-                            return parts[0][0].toUpperCase();
+
+                          if (name && typeof name === 'string' && name.trim().length > 0) {
+                            const parts = name.trim().split(/\s+/).filter(p => p.length > 0);
+                            if (parts.length >= 2) {
+                              return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                            }
+                            if (parts.length === 1 && parts[0].length > 0) {
+                              return parts[0][0].toUpperCase();
+                            }
                           }
-                          return user.email?.[0].toUpperCase();
+
+                          return user.email?.[0]?.toUpperCase() || "U";
                         })()}
                       </div>
                     </Button>
