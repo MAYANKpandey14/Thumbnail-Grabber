@@ -10,35 +10,38 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export default function Signup() {
+    const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [isSigningUp, setIsSigningUp] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { signUp, signInWithGoogle } = useAuth();
 
     // Password Validation Logic
-    const validationResult = validatePassword(password, email);
-    const doPasswordsMatch = password === confirmPassword && password !== "";
-    const isFormValid = validationResult.valid && doPasswordsMatch && email !== "";
+    const validationResult = validatePassword(password);
+    const isFormValid = validationResult.valid && email !== "" && fullName.trim() !== "";
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const currentValidation = validatePassword(password, email);
+        const currentValidation = validatePassword(password);
         if (!currentValidation.valid) {
             toast.error("Please meet all password requirements.");
             return;
         }
 
-        if (password !== confirmPassword) {
-            toast.error("Passwords do not match.");
-            return;
-        }
-
         setIsSigningUp(true);
-        const { error } = await signUp({ email, password });
+        // Pass extra metadata for full name
+        const { error } = await signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: fullName
+                }
+            }
+        });
+
         if (error) {
             toast.error(error.message);
         } else {
@@ -55,12 +58,12 @@ export default function Signup() {
     };
 
     return (
-        <Card className="w-full shadow-lg max-h-[85vh] overflow-y-auto">
+        <Card className="w-full max-w-[400px] shadow-lg">
             <CardHeader>
                 <CardTitle className="text-2xl text-center">Create Account</CardTitle>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4">
+                <form onSubmit={handleSignup} className="space-y-3">
                     <Button type="button" variant="outline" className="w-full" onClick={handleGoogleLogin}>
                         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                             <path
@@ -83,11 +86,24 @@ export default function Signup() {
                         </svg>
                         Google
                     </Button>
+                    <div className="relative my-3">
+                        <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
+                    </div>
+
                     <div className="space-y-2">
-                        <div className="relative my-4">
-                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
-                        </div>
+                        <label className="text-sm font-medium" htmlFor="fullName">Full Name</label>
+                        <Input
+                            id="fullName"
+                            type="text"
+                            value={fullName}
+                            onChange={e => setFullName(e.target.value)}
+                            required
+                            placeholder="John Doe"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
                         <label className="text-sm font-medium" htmlFor="email">Email</label>
                         <Input
                             id="email"
@@ -123,38 +139,6 @@ export default function Signup() {
                             </Button>
                         </div>
                         <PasswordChecklist validationResult={validationResult} />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium" htmlFor="confirmPassword">Confirm Password</label>
-                        <div className="relative">
-                            <Input
-                                id="confirmPassword"
-                                type={showConfirmPassword ? "text" : "password"}
-                                value={confirmPassword}
-                                onChange={e => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                {showConfirmPassword ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7c.44 0 .87-.03 1.28-.09" /><line x1="2" x2="22" y1="2" y2="22" /></svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
-                                )}
-                            </Button>
-                        </div>
-                        {confirmPassword && !doPasswordsMatch && (
-                            <p className="text-xs text-destructive">Passwords do not match</p>
-                        )}
-                        {confirmPassword && doPasswordsMatch && (
-                            <p className="text-xs text-green-500">Passwords match</p>
-                        )}
                     </div>
 
                     <Button type="submit" className="w-full" disabled={isSigningUp || !isFormValid}>

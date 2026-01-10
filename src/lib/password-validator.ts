@@ -7,30 +7,20 @@ export interface PasswordValidationResult {
         hasDigit: boolean;
         hasSpecial: boolean;
         noSurroundingSpaces: boolean;
-        notEmail: boolean;
     };
 }
 
-export const validatePassword = (password: string, email?: string): PasswordValidationResult => {
+export const validatePassword = (password: string): PasswordValidationResult => {
     const minLength = 12;
     const hasUpper = /[A-Z]/.test(password);
     const hasLower = /[a-z]/.test(password);
     const hasDigit = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*(),.?":{}|<>\-_=+[\]{};'\\/`~]/.test(password); // Broad set of special chars
     const noSurroundingSpaces = password.trim() === password && password.length > 0;
-
-    let notEmail = true;
-    if (email && email.includes('@')) {
-        const localPart = email.split('@')[0];
-        if (password === email || (localPart.length > 0 && password.includes(localPart))) {
-            notEmail = false;
-        }
-    }
-
     const isMinLength = password.length >= minLength;
 
     return {
-        valid: isMinLength && hasUpper && hasLower && hasDigit && hasSpecial && noSurroundingSpaces && notEmail,
+        valid: isMinLength && hasUpper && hasLower && hasDigit && hasSpecial && noSurroundingSpaces,
         rules: {
             minLength: isMinLength,
             hasUpper,
@@ -38,7 +28,6 @@ export const validatePassword = (password: string, email?: string): PasswordVali
             hasDigit,
             hasSpecial,
             noSurroundingSpaces,
-            notEmail,
         },
     };
 };
@@ -49,6 +38,5 @@ export const PASSWORD_REQUIREMENTS = [
     { key: 'hasLower', label: 'At least one lowercase letter (a-z)' },
     { key: 'hasDigit', label: 'At least one number (0-9)' },
     { key: 'hasSpecial', label: 'At least one special character' },
-    { key: 'noSurroundingSpaces', label: 'No leading or trailing spaces' },
-    { key: 'notEmail', label: 'Must not contain your email address' },
+    { key: 'noSurroundingSpaces', label: 'No leading or trailing spaces' }
 ] as const;
