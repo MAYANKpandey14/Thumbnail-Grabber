@@ -11,6 +11,7 @@ import { extractVideoId } from "@/utils/extractVideoId";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBulkCsv } from "@/hooks/useBulkCsv";
+import heroIcon from "@/assets/Thumbnail_Grabber.png";
 
 interface HeroInputProps {
   onSearch: (urls: string[], previewOnly: boolean) => void;
@@ -124,6 +125,18 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
 
   return (
     <div className="w-full max-w-[95%] sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-20 text-center">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex justify-center mb-2"
+      >
+        <img
+          src={heroIcon}
+          alt="YouTube Thumbnails"
+          className="w-28 h-28 md:w-40 md:h-40 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+        />
+      </motion.div>
       <motion.h1
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

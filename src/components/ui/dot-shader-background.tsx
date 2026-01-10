@@ -65,12 +65,12 @@ const DotMaterial = shaderMaterial(
       float baseDot = sdfCircle(gridUv, 0.25);
 
       // Screen mask
-      float screenMask = smoothstep(0.0, 1.0, 1.0 - uv.y); // 0 at the top, 1 at the bottom
+      float screenMask = smoothstep(0.1, 0.8, screenUv.y); // Fades out at the bottom, opaque at top
       vec2 centerDisplace = vec2(0.7, 1.1);
       float circleMaskCenter = length(uv - centerDisplace);
-      float circleMaskFromCenter = smoothstep(0.5, 1.0, circleMaskCenter);
+
       
-      float combinedMask = screenMask * circleMaskFromCenter;
+      float combinedMask = screenMask;
       float circleAnimatedMask = sin(time * 2.0 + circleMaskCenter * 10.0);
 
       // Mouse trail effect
@@ -78,8 +78,8 @@ const DotMaterial = shaderMaterial(
       
       float scaleInfluence = max(mouseInfluence * 0.5, circleAnimatedMask * 0.3);
 
-      // Create dots with animated scale, influenced by mouse
-      float dotSize = min(pow(circleMaskCenter, 2.0) * 0.3, 0.3);
+      // Create dots with size gradient (smaller at bottom, larger at top)
+      float dotSize = mix(0.1, 0.3, screenUv.y);
 
       float sdfDot = sdfCircle(gridUv, dotSize * (1.0 + scaleInfluence * 0.5));
 
@@ -104,7 +104,7 @@ function Scene() {
     const { theme } = useTheme()
 
     const rotation = 0
-    const gridSize = 100
+    const gridSize = 30
 
     const getThemeColors = () => {
         switch (theme) {

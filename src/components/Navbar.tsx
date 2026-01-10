@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import heroIcon from "@/assets/Thumbnail_Grabber.png";
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -34,6 +35,7 @@ export default function Navbar() {
         <div className="container flex h-12 md:h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 md:gap-4">
             <Link to="/" className="flex items-center gap-1.5 md:gap-2 font-bold text-base md:text-lg text-primary font-heading">
+              <img src={heroIcon} alt="Logo" className="w-6 h-6 md:w-8 md:h-8 object-contain" />
               <span>Thumbnail Grabber</span>
             </Link>
           </div>

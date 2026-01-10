@@ -8,15 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
   DialogClose,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { ImageEditorDialog } from "@/components/ImageEditorDialog";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ZipSettingsDialog } from "./ZipSettingsDialog";
+import { useZipSettings } from "@/context/ZipSettingsContext";
+import { sanitizeFilename } from "@/utils/filenameUtils";
 
 // Robust saveAs helper that handles different export formats from esm.sh
 const saveFile = (data: Blob | string, filename: string) => {
@@ -59,6 +63,7 @@ interface ThumbnailCardProps {
   onDownloadComplete: (blob: Blob, thumb: Thumbnail, videoId: string) => Promise<void>;
 }
 
+
 const ThumbnailCard = React.memo<ThumbnailCardProps>(({
   thumb,
   videoId,
@@ -67,6 +72,19 @@ const ThumbnailCard = React.memo<ThumbnailCardProps>(({
 }) => {
   const [status, setStatus] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const handleSaveCrop = async (blob: Blob) => {
+    // Save the cropped image
+    // We treat it as a new download but with the same quality tag for now, or maybe append '-edited'
+    // For now, let's just save it to disk and maybe notify parent if needed
+    saveFile(blob, `yt-${videoId}-${thumb.quality}-edited.jpg`);
+
+    // Optionally notify parent to track it
+    await onDownloadComplete(blob, { ...thumb, quality: `${thumb.quality}-edited` as any }, videoId);
+
+    toast.success("Edited thumbnail saved!");
+  };
 
   const handleDownload = async () => {
     if (!checkDownloadAllowed()) return;
@@ -226,8 +244,24 @@ const ThumbnailCard = React.memo<ThumbnailCardProps>(({
               {thumb.quality.toUpperCase()}
             </Badge>
           </div>
-          <span className="text-xs text-muted-foreground font-mono uppercase">JPG</span>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => setIsEditorOpen(true)}
+            >
+              Edit
+            </Button>
+            <span className="text-xs text-muted-foreground font-mono uppercase self-center">JPG</span>
+          </div>
         </CardContent>
+        <ImageEditorDialog
+          open={isEditorOpen}
+          onOpenChange={setIsEditorOpen}
+          imageUrl={thumb.url}
+          onSave={handleSaveCrop}
+        />
       </Card>
     </motion.div>
   );
@@ -235,6 +269,7 @@ const ThumbnailCard = React.memo<ThumbnailCardProps>(({
 
 export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloadComplete }: ThumbnailGridProps) {
   const [isZipping, setIsZipping] = useState(false);
+  const { filenamePattern, folderStructure, qualityFilter } = useZipSettings();
 
   const downloadAllZip = async () => {
     // Basic bulk check - strictly we should check if they have enough credits for all
@@ -248,13 +283,56 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
       const allPromises: Promise<void>[] = [];
 
       results.forEach((videoData) => {
-        const folder = zip.folder(`video-${videoData.videoId}`);
+        // Group by video folder if structure is nested AND pattern is default
+        // If pattern is flat-title or flat-id, we usually want flat structure or we manually name them
+        const useNestedFolder = folderStructure === 'nested';
+
+        const folder = useNestedFolder ? zip.folder(sanitizeFilename(videoData.videoTitle).substring(0, 50)) : zip; // Use title for folder if nested, or just zip root
+
         videoData.thumbnails.forEach((thumb) => {
+          // Skip if quality not selected
+          if (!qualityFilter.includes(thumb.quality as any)) return;
+
           allPromises.push(
             fetch(thumb.url)
               .then(res => res.blob())
               .then(blob => {
-                folder?.file(`${thumb.quality}.jpg`, blob);
+                let filename = `${thumb.quality}.jpg`;
+
+                if (filenamePattern === 'flat-title') {
+                  filename = `${sanitizeFilename(videoData.videoTitle)} - ${thumb.quality}.jpg`;
+                } else if (filenamePattern === 'flat-id') {
+                  filename = `${videoData.videoId} - ${thumb.quality}.jpg`;
+                }
+
+                // If nested, we just use quality.jpg inside the folder
+                // If NOT nested (flat), we definitely need unique names so we respect the pattern
+                // But wait, if structure is nested, we put it in a folder. 
+                // If structure is flat, we put it in root with the specific filename.
+
+                if (useNestedFolder) {
+                  // Inside the folder (which is named by title or ID), we just want the quality name usually
+                  // But if the user selected "Flat Title" pattern but "Nested" structure, it's a bit ambiguous.
+                  // Let's assume Pattern dictates the file name, Structure dictates the folder.
+                  // If nested, we normally expect [One Folder Per Video] / [quality].jpg
+                  // If the user wants specific filenames INSIDE the folder, we can do that too.
+
+                  if (filenamePattern === 'default') {
+                    folder?.file(`${thumb.quality}.jpg`, blob);
+                  } else {
+                    // They want specific filenames even inside the folder
+                    folder?.file(filename, blob);
+                  }
+                } else {
+                  // Flat structure - everything in root
+                  // We must ensure uniqueness if multiple videos have 'maxres.jpg'
+                  if (filenamePattern === 'default') {
+                    // Default pattern in flat mode is ambiguous, let's fallback to ID-Quality
+                    zip.file(`${videoData.videoId}-${thumb.quality}.jpg`, blob);
+                  } else {
+                    zip.file(filename, blob);
+                  }
+                }
               })
               .catch(err => console.error(`Failed to fetch ${thumb.url}`, err))
           );
@@ -298,7 +376,7 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
             <Badge variant="secondary">{results.length} {results.length === 1 ? "Video" : "Videos"}</Badge>
           </h2>
         </div>
-        <Button onClick={downloadAllZip} disabled={isZipping} className="shadow-md">
+        <Button onClick={downloadAllZip} disabled={isZipping} className="shadow-md rounded-r-none border-r-0">
           {isZipping ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Zipping...
@@ -309,6 +387,7 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
             </>
           )}
         </Button>
+        <ZipSettingsDialog />
       </div>
 
       {results.map((videoData, index) => (

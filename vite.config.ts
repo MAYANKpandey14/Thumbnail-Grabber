@@ -25,17 +25,26 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
             'vendor-ui': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-alert-dialog',
+              '@radix-ui/react-checkbox',
               '@radix-ui/react-dialog',
-              '@radix-ui/react-select',
+              '@radix-ui/react-dropdown-menu',
               '@radix-ui/react-label',
+              '@radix-ui/react-select',
+              '@radix-ui/react-slider',
               '@radix-ui/react-slot',
-              'lucide-react',
+              '@radix-ui/react-tabs',
               'class-variance-authority',
               'clsx',
               'tailwind-merge',
-              'sonner'
+              'sonner',
+              'lucide-react'
             ],
-            'vendor-supabase': ['@supabase/supabase-js']
+            'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+            'vendor-framer': ['framer-motion'],
+            'vendor-supabase': ['@supabase/supabase-js', '@supabase/ssr'],
+            'vendor-utils': ['date-fns', 'jszip', 'file-saver', 'papaparse', 'zod', 'react-hook-form']
           }
         }
       }
