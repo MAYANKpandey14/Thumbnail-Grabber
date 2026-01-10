@@ -10,7 +10,8 @@ import { getThumbnails } from "@/lib/youtube";
 import { useGuestLimit } from "@/hooks/useGuestLimit";
 import { useAuth } from "@/hooks/useAuth";
 import { useDownloads } from "@/hooks/useDownloads";
-import { DotScreenShader } from "@/components/ui/dot-shader-background";
+
+import Footer from "@/components/Footer";
 
 export default function Home() {
     const [results, setResults] = useState<ThumbnailResponse[]>([]);
@@ -86,12 +87,8 @@ export default function Home() {
             <Navbar />
             <main className="flex-1">
                 {/* Hero Section with Shader Background */}
-                <div className="relative w-full overflow-hidden">
-                    <div className="absolute inset-0 z-0 pointer-events-auto">
-                        <DotScreenShader />
-                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-                    </div>
-                    <div className="relative z-10 pointer-events-none">
+                <div className="relative w-full overflow-hidden min-h-[300px] flex flex-col justify-center py-4">
+                    <div className="relative z-10 pointer-events-auto">
                         <HeroInput onSearch={handleSearch} isLoading={loading} />
                     </div>
                 </div>
@@ -117,6 +114,7 @@ export default function Home() {
                     </div>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 }

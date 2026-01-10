@@ -1,18 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, LogOut, LogIn, UserPlus } from "lucide-react";
+import { LogOut, LogIn, UserPlus, Warehouse } from "lucide-react";
 import { toast } from "sonner";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import heroIcon from "@/assets/Thumbnail_Grabber.png";
 
@@ -43,36 +42,56 @@ export default function Navbar() {
           <div className="flex items-center gap-1.5 md:gap-3">
             {user ? (
               <>
-                <Button variant="ghost" size="sm" asChild className={location.pathname === "/dashboard" ? "bg-accent" : ""}>
+                <Button variant="ghost" size="sm" asChild className={location.pathname === "/dashboard" ? "bg-accent" : "flex items-center justify-center"}>
                   <Link to="/dashboard">
-                    <LayoutGrid className="w-4 h-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
+                    <Warehouse className="w-5 h-5" />
+                    <span className="hidden md:inline">Dashboard</span>
                   </Link>
                 </Button>
-                <div className="flex items-center gap-1.5 md:gap-2">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs md:text-sm">
-                    {user.email?.[0].toUpperCase()}
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => setShowLogoutConfirm(true)}>
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
+                      <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary font-heading font-bold text-xs">
+                        {(() => {
+                          const meta = user.user_metadata || {};
+                          const name = meta.full_name || meta.name;
+                          if (name) {
+                            const parts = name.trim().split(" ");
+                            if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                            return parts[0][0].toUpperCase();
+                          }
+                          return user.email?.[0].toUpperCase();
+                        })()}
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || user.user_metadata?.name || "Account"}</p>
+                        <p className="text-xs leading-none text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/auth/login">
-                    <LogIn className="w-4 h-4" />
-                    <span className="hidden sm:inline">Login</span>
-                  </Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/auth/signup">
-                    <UserPlus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sign Up</span>
-                  </Link>
-                </Button>
-              </div>
+              <Button
+                className="font-heading font-bold border-2 border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 active:scale-95"
+                size="sm"
+                variant="secondary"
+                asChild
+              >
+                <Link to="/auth/signup">
+                  Grab in Bulk !
+                </Link>
+              </Button>
             )}
           </div>
         </div>

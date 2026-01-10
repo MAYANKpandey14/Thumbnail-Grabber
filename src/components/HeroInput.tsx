@@ -158,24 +158,41 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
         animate={{ opacity: 1 }}
         className="flex justify-center mb-4 pointer-events-auto"
       >
-        <div className="bg-muted p-1 rounded-lg inline-flex">
-          <Button
-            variant={!isBulk ? "default" : "ghost"}
-            size="sm"
+        <div className="bg-secondary/50 p-1.5 rounded-full inline-flex relative border border-border/50 backdrop-blur-sm gap-1">
+          <button
             onClick={() => setIsBulk(false)}
-            className="text-xs"
+            className={cn(
+              "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10",
+              !isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
           >
+            {!isBulk && (
+              <motion.div
+                layoutId="active-tab-pill"
+                className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
             Single Video
-          </Button>
-          <Button
-            variant={isBulk ? "default" : "ghost"}
-            size="sm"
+          </button>
+
+          <button
             onClick={() => setIsBulk(true)}
-            className="text-xs gap-2"
+            className={cn(
+              "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10 flex items-center gap-2",
+              isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <Layers className="w-3 h-3" />
+            {isBulk && (
+              <motion.div
+                layoutId="active-tab-pill"
+                className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <Layers className="w-4 h-4" />
             Bulk Mode
-          </Button>
+          </button>
         </div>
       </motion.div>
 

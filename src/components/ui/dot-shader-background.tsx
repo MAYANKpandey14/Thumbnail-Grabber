@@ -53,19 +53,50 @@ const DotMaterial = shaderMaterial(
 
     void main() {
       vec2 screenUv = gl_FragCoord.xy / resolution;
-      vec2 uv = coverUv(screenUv);
+      
+      // ANCHOR PATTERN TO TOP CENTER to prevent shift on resize
+      // x: centered, y: 0 at top, increasing downwards
+      vec2 divSize = resolution.xy;
+      vec2 adjustedFrag = vec2(gl_FragCoord.x - divSize.x * 0.5, divSize.y - gl_FragCoord.y);
+      vec2 uv = adjustedFrag / divSize.x; // Scale uniform based on width
 
       vec2 rotatedUv = rotate(uv, rotation);
 
       // Create a grid
       vec2 gridUv = fract(rotatedUv * gridSize);
-      vec2 gridUvCenterInScreenCoords = rotate((floor(rotatedUv * gridSize) + 0.5) / gridSize, -rotation);
+      
+      // Map grid centers back for effects - this might be tricky with new coords but let's try standard
+      // Actually mouseTrail might depend on screen coords? 
+      // trail is 0..1. 
+      // gridUvCenterInScreenCoords needs to be in 0..1 range matching screenUv if possible?
+      // Original: rotate((floor...)/gridSize, -rotation) was essentially 'uv' (0..1 mostly?)
+      
+      // Let's keep logic simple: if we change 'uv' space, we change the pattern space.
+      // mouseTrail looks up via texture2D(mouseTrail, coord). 
+      // if coord is not 0..1, it repeats or clamps. 
+      // We should probably just use screenUv for mouseLookups to be safe/easy?
+      
+      // Re-calculate grid center in "Pattern Space"
+      vec2 cellId = floor(rotatedUv * gridSize);
+      vec2 cellCenterPattern = (cellId + 0.5) / gridSize;
+      vec2 cellCenterRotated = rotate(cellCenterPattern, -rotation);
+      
+      // Convert Pattern Space back to Screen Space (0..1) for Mouse Trail?
+      // screenX = (patternX * width) + width/2
+      // screenY = height - (patternY * width)
+      // then divide by resolution
+      
+      vec2 cellCenterScreenPixels = vec2(
+          cellCenterRotated.x * divSize.x + divSize.x * 0.5,
+          divSize.y - (cellCenterRotated.y * divSize.x)
+      );
+      vec2 gridUvCenterInScreenCoords = cellCenterScreenPixels / divSize;
 
       // Calculate distance from the center of each cell
       float baseDot = sdfCircle(gridUv, 0.25);
 
-      // Screen mask
-      float screenMask = smoothstep(0.1, 0.8, screenUv.y); // Fades out at the bottom, opaque at top
+      // Screen mask (using uv.y which is 0 at top)
+      float screenMask = 1.0 - smoothstep(0.15, 0.45, uv.y); 
       vec2 centerDisplace = vec2(0.7, 1.1);
       float circleMaskCenter = length(uv - centerDisplace);
 
@@ -78,14 +109,14 @@ const DotMaterial = shaderMaterial(
       
       float scaleInfluence = max(mouseInfluence * 0.5, circleAnimatedMask * 0.3);
 
-      // Create dots with size gradient (smaller at bottom, larger at top)
-      float dotSize = mix(0.1, 0.3, screenUv.y);
+      // Create dots with size gradient (using uv.y: 0 at top = large, >0.25 = small)
+      float dotSize = mix(0.22, 0.06, smoothstep(0.02, 0.25, uv.y));
 
       float sdfDot = sdfCircle(gridUv, dotSize * (1.0 + scaleInfluence * 0.5));
 
       float smoothDot = smoothstep(0.05, 0.0, sdfDot);
 
-      float opacityInfluence = max(mouseInfluence * 50.0, circleAnimatedMask * 0.5);
+      float opacityInfluence = max(mouseInfluence * 10.0, circleAnimatedMask * 0.5);
 
       // Mix background color with dot color, using animated opacity to increase visibility
       vec3 composition = mix(bgColor, dotColor, smoothDot * combinedMask * dotOpacity * (1.0 + opacityInfluence));
@@ -103,8 +134,8 @@ function Scene() {
     const viewport = useThree((s) => s.viewport)
     const { theme } = useTheme()
 
-    const rotation = 0
-    const gridSize = 30
+    const rotation = 60
+    const gridSize = 40
 
     const getThemeColors = () => {
         switch (theme) {
