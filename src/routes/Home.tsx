@@ -87,7 +87,7 @@ export default function Home() {
             <Navbar />
             <main className="flex-1">
                 {/* Hero Section with Shader Background */}
-                <div className="relative w-full overflow-hidden min-h-[300px] flex flex-col justify-center py-4">
+                <div className="relative w-full overflow-hidden min-h-[300px] flex flex-col justify-center">
                     <div className="relative z-10 pointer-events-auto">
                         <HeroInput onSearch={handleSearch} isLoading={loading} />
                     </div>

@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBulkCsv } from "@/hooks/useBulkCsv";
 import heroIcon from "@/assets/Thumbnail_Grabber.png";
+import { HeroHighlight } from "@/components/ui/hero-highlight";
 
 interface HeroInputProps {
   onSearch: (urls: string[], previewOnly: boolean) => void;
@@ -124,218 +125,221 @@ export default function HeroInput({ onSearch, isLoading }: HeroInputProps) {
   };
 
   return (
-    <div className="w-full max-w-[95%] sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-20 text-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="flex justify-center mb-2"
-      >
-        <img
-          src={heroIcon}
-          alt="YouTube Thumbnails"
-          className="w-28 h-28 md:w-40 md:h-40 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-        />
-      </motion.div>
-      <motion.h1
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 md:mb-6"
-      >
-        Download <span className="text-primary">YouTube</span> Thumbnails
-      </motion.h1>
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto pointer-events-auto"
-      >
-        Get high-quality thumbnails in FHD. Fast, free, and secure.
-      </motion.p>
+    <HeroHighlight containerClassName="h-auto min-h-[40rem] px-4 py-8 sm:py-12 md:py-20">
+      <div className="w-full max-w-[95%] sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto text-center relative z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.55)_0%,transparent_60%)] blur-3xl -z-10 rounded-full pointer-events-none dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,transparent_60%)]" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center mb-2"
+        >
+          <img
+            src={heroIcon}
+            alt="YouTube Thumbnails"
+            className="w-28 h-28 md:w-40 md:h-40 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+          />
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 md:mb-6 drop-shadow-[0_0_25px_rgba(255,255,255,1)] dark:drop-shadow-[0_0_35px_rgba(255,255,255,0.6)]"
+        >
+          Download <span className="text-primary">YouTube</span> Thumbnails
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto pointer-events-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]"
+        >
+          Get high-quality thumbnails in FHD. Fast, free, and secure.
+        </motion.p>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex justify-center mb-4 pointer-events-auto"
-      >
-        <div className="bg-secondary/50 p-1.5 rounded-full inline-flex relative border border-border/50 backdrop-blur-sm gap-1">
-          <button
-            onClick={() => setIsBulk(false)}
-            className={cn(
-              "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10",
-              !isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {!isBulk && (
-              <motion.div
-                layoutId="active-tab-pill"
-                className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            Single Video
-          </button>
-
-          <button
-            onClick={() => setIsBulk(true)}
-            className={cn(
-              "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10 flex items-center gap-2",
-              isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {isBulk && (
-              <motion.div
-                layoutId="active-tab-pill"
-                className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <Layers className="w-4 h-4" />
-            Bulk Mode
-          </button>
-        </div>
-      </motion.div>
-
-      {/* Hidden File Input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept=".csv,application/vnd.ms-excel"
-        className="hidden"
-      />
-
-      <motion.div
-        layout
-        transition={{ layout: { duration: 0.3, type: "spring", bounce: 0 } }}
-        className={cn(
-          "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300 pointer-events-auto",
-          error ? "border-red-500" : (isFocused ? "border-primary/50" : "border-border"),
-          isFocused ? "shadow-primary/20 shadow-xl" : "",
-          isDragging ? "bg-primary/5" : ""
-        )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className="relative flex-1 text-left">
-          <AnimatePresence mode="wait">
-            {isBulk ? (
-              <motion.div
-                key="bulk-mode"
-                {...fadeInAnimation}
-                className="w-full"
-              >
-                {!user ? (
-                  <div className="h-[200px] flex flex-col items-center justify-center space-y-3 p-4 bg-muted/30 rounded-xl border-2 border-dashed text-center transition-colors hover:bg-muted/50">
-                    <div className="text-sm font-medium text-muted-foreground">
-                      Bulk Mode is available for logged-in users only.
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="default" size="sm" asChild className="rounded-full px-6">
-                        <Link to="/auth/login">Login</Link>
-                      </Button>
-                      <Button variant="outline" size="sm" asChild className="rounded-full px-6">
-                        <Link to="/auth/signup">Sign Up</Link>
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative flex flex-col gap-4 p-2">
-                    {/* Text Input styled like Single Mode */}
-                    <div className="relative flex items-start">
-                      <div className="absolute left-3 top-3 text-muted-foreground">
-                        <Search className="h-5 w-5" />
-                      </div>
-                      <Textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                        placeholder="Paste YouTube URLs ( one per line ), Upload or Drag and Drop .csv file"
-                        className="min-h-[80px] w-full text-base border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none resize-none p-3 pl-10 bg-muted/10 rounded-lg placeholder:text-muted-foreground/60 focus:bg-muted/20 transition-colors"
-                        disabled={isLoading || isProcessing}
-                      />
-                    </div>
-
-                    {/* CSV Dropzone - Reference Style */}
-                    <div
-                      onClick={handleFileClick}
-                      className={cn(
-                        "group cursor-pointer border-2 border-dashed border-muted-foreground/25 rounded-xl p-8 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5",
-                        isDragging && "border-primary bg-primary/10"
-                      )}
-                    >
-                      <div className="flex flex-col items-center justify-center text-center gap-2">
-                        <div className="p-3 bg-primary/10 rounded-full group-hover:scale-110 transition-transform duration-300">
-                          {isProcessing ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <CloudUpload className="w-6 h-6 text-primary" />}
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-semibold text-foreground/80">
-                            <span className="text-primary hover:underline">Click here</span> to upload your file or drag and drop.
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Supported Format: .CSV (YouTube URLs)
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="single-mode"
-                {...fadeInAnimation}
-                className="relative flex flex-col"
-              >
-                <div className="relative h-[60px] flex items-center">
-                  <div className="absolute left-4 text-muted-foreground/50">
-                    <Search className="w-5 h-5" />
-                  </div>
-                  <Input
-                    value={input}
-                    onChange={handleInputChange}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder="Paste YouTube URL here..."
-                    className="pl-12 pr-4 h-full text-base md:text-lg border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none w-full bg-transparent placeholder:text-muted-foreground/50"
-                    disabled={isLoading}
-                  />
-                </div>
-                {error && (
-                  <div className="px-4 pb-2 text-sm text-red-500 font-medium text-left bg-red-50/50 rounded-b-xl animate-in slide-in-from-top-1">
-                    {error}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Bulk Grab Button at Bottom */}
-        {isBulk && user && (
-          <div className="px-2 pb-2 pointer-events-auto">
-            <Button
-              size="default"
-              className="w-full font-semibold shadow-lg h-10 md:h-12 rounded-lg"
-              disabled={isLoading || !input || isProcessing}
-              onClick={(e) => handleSubmit(e, false)}
-            >
-              {isLoading || isProcessing ? (
-                <>
-                  <Loader2 className="animate-spin mr-2 h-4 w-4" /> Processing...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" /> Bulk Grab
-                </>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-center mb-4 pointer-events-auto"
+        >
+          <div className="bg-secondary/50 p-1.5 rounded-full inline-flex relative border border-border/50 backdrop-blur-sm gap-1">
+            <button
+              onClick={() => setIsBulk(false)}
+              className={cn(
+                "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10",
+                !isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               )}
-            </Button>
-          </div>
-        )}
+            >
+              {!isBulk && (
+                <motion.div
+                  layoutId="active-tab-pill"
+                  className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              Single Video
+            </button>
 
-      </motion.div>
-    </div>
+            <button
+              onClick={() => setIsBulk(true)}
+              className={cn(
+                "relative px-6 py-2 text-xs md:text-sm font-heading font-bold rounded-full transition-colors duration-200 z-10 flex items-center gap-2",
+                isBulk ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {isBulk && (
+                <motion.div
+                  layoutId="active-tab-pill"
+                  className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25 -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <Layers className="w-4 h-4" />
+              Bulk Mode
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".csv,application/vnd.ms-excel"
+          className="hidden"
+        />
+
+        <motion.div
+          layout
+          transition={{ layout: { duration: 0.3, type: "spring", bounce: 0 } }}
+          className={cn(
+            "relative flex flex-col gap-2 p-2 rounded-xl border-2 bg-background shadow-lg transition-all duration-300 pointer-events-auto",
+            error ? "border-red-500" : (isFocused ? "border-primary/50" : "border-border"),
+            isFocused ? "shadow-primary/20 shadow-xl" : "",
+            isDragging ? "bg-primary/5" : ""
+          )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="relative flex-1 text-left">
+            <AnimatePresence mode="wait">
+              {isBulk ? (
+                <motion.div
+                  key="bulk-mode"
+                  {...fadeInAnimation}
+                  className="w-full"
+                >
+                  {!user ? (
+                    <div className="h-[200px] flex flex-col items-center justify-center space-y-3 p-4 bg-muted/30 rounded-xl border-2 border-dashed text-center transition-colors hover:bg-muted/50">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Bulk Mode is available for logged-in users only.
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="default" size="sm" asChild className="rounded-full px-6">
+                          <Link to="/auth/login">Login</Link>
+                        </Button>
+                        <Button variant="outline" size="sm" asChild className="rounded-full px-6">
+                          <Link to="/auth/signup">Sign Up</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative flex flex-col gap-4 p-2">
+                      {/* Text Input styled like Single Mode */}
+                      <div className="relative flex items-start">
+                        <div className="absolute left-3 top-3 text-muted-foreground">
+                          <Search className="h-5 w-5" />
+                        </div>
+                        <Textarea
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          onFocus={() => setIsFocused(true)}
+                          onBlur={() => setIsFocused(false)}
+                          placeholder="Paste YouTube URLs ( one per line ), Upload or Drag and Drop .csv file"
+                          className="min-h-[80px] w-full text-base border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none resize-none p-3 pl-10 bg-muted/10 rounded-lg placeholder:text-muted-foreground/60 focus:bg-muted/20 transition-colors"
+                          disabled={isLoading || isProcessing}
+                        />
+                      </div>
+
+                      {/* CSV Dropzone - Reference Style */}
+                      <div
+                        onClick={handleFileClick}
+                        className={cn(
+                          "group cursor-pointer border-2 border-dashed border-muted-foreground/25 rounded-xl p-8 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5",
+                          isDragging && "border-primary bg-primary/10"
+                        )}
+                      >
+                        <div className="flex flex-col items-center justify-center text-center gap-2">
+                          <div className="p-3 bg-primary/10 rounded-full group-hover:scale-110 transition-transform duration-300">
+                            {isProcessing ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <CloudUpload className="w-6 h-6 text-primary" />}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-foreground/80">
+                              <span className="text-primary hover:underline">Click here</span> to upload your file or drag and drop.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Supported Format: .CSV (YouTube URLs)
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="single-mode"
+                  {...fadeInAnimation}
+                  className="relative flex flex-col"
+                >
+                  <div className="relative h-[60px] flex items-center">
+                    <div className="absolute left-4 text-muted-foreground/50">
+                      <Search className="w-5 h-5" />
+                    </div>
+                    <Input
+                      value={input}
+                      onChange={handleInputChange}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
+                      placeholder="Paste YouTube URL here..."
+                      className="pl-12 pr-4 h-full text-base md:text-lg border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0 outline-none w-full bg-transparent placeholder:text-muted-foreground/50"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {error && (
+                    <div className="px-4 pb-2 text-sm text-red-500 font-medium text-left bg-red-50/50 rounded-b-xl animate-in slide-in-from-top-1">
+                      {error}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Bulk Grab Button at Bottom */}
+          {isBulk && user && (
+            <div className="px-2 pb-2 pointer-events-auto">
+              <Button
+                size="default"
+                className="w-full font-semibold shadow-lg h-10 md:h-12 rounded-lg"
+                disabled={isLoading || !input || isProcessing}
+                onClick={(e) => handleSubmit(e, false)}
+              >
+                {isLoading || isProcessing ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2 h-4 w-4" /> Processing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" /> Bulk Grab
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+        </motion.div>
+      </div>
+    </HeroHighlight>
   );
 }
