@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import {
     Select,
@@ -18,11 +19,21 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings2 } from "lucide-react";
-import { useZipSettings, QualityFilter } from "@/context/ZipSettingsContext";
-import React from "react";
+import { Settings2, RotateCcw } from "lucide-react";
+import { useZipSettings } from "@/context/ZipSettingsContext";
+import React, { useState } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const qualityOptions = [
+    { value: "maxres", label: "Max Res", desc: "1920×1080" },
+    { value: "high", label: "High", desc: "640×480" },
+    { value: "medium", label: "Medium", desc: "320×180" },
+    { value: "standard", label: "Standard", desc: "120×90" },
+] as const;
 
 export function ZipSettingsDialog() {
+    const [open, setOpen] = useState(false);
     const {
         filenamePattern,
         folderStructure,
@@ -41,22 +52,37 @@ export function ZipSettingsDialog() {
         updateSettings({ qualityFilter: newFilter });
     };
 
+    const handleSaveAndClose = () => {
+        toast.success("Settings saved");
+        setOpen(false);
+    };
+
+    const handleReset = () => {
+        resetSettings();
+        toast.info("Settings reset");
+    };
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="icon" title="Zip Settings">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-none h-9 w-9 hover:bg-accent"
+                    title="Export Settings"
+                >
                     <Settings2 className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[400px]">
                 <DialogHeader>
-                    <DialogTitle>Download Settings</DialogTitle>
+                    <DialogTitle>Export Settings</DialogTitle>
                     <DialogDescription>
-                        Configure how your ZIP archives are generated.
+                        Configure your ZIP archive options
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-6 py-4">
 
+                <div className="grid gap-5 py-4">
                     {/* Filename Pattern */}
                     <div className="grid gap-2">
                         <Label htmlFor="filename-pattern">Filename Pattern</Label>
@@ -73,11 +99,6 @@ export function ZipSettingsDialog() {
                                 <SelectItem value="flat-id">Flat ID (VideoID - Quality.jpg)</SelectItem>
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground">
-                            {filenamePattern === 'default' && "Creates folders for each video."}
-                            {filenamePattern === 'flat-title' && "All files in one folder, named by title."}
-                            {filenamePattern === 'flat-id' && "All files in one folder, named by ID."}
-                        </p>
                     </div>
 
                     {/* Folder Structure */}
@@ -91,38 +112,72 @@ export function ZipSettingsDialog() {
                                 <SelectValue placeholder="Select structure" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="nested">Group by Video (Nested Folders)</SelectItem>
-                                <SelectItem value="flat">Flat List (All files in root)</SelectItem>
+                                <SelectItem value="nested">Nested (Group by Video)</SelectItem>
+                                <SelectItem value="flat">Flat (All in root)</SelectItem>
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground">
-                            "Flat List" puts all images directly in the zip root (useful with Flat Title/ID).
-                        </p>
                     </div>
 
                     {/* Quality Filter */}
-                    <div className="grid gap-2">
+                    <div className="grid gap-3">
                         <Label>Qualities to Include</Label>
-                        <div className="grid grid-cols-2 gap-4">
-                            {["maxres", "high", "medium", "standard"].map((q) => (
-                                <div key={q} className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={`q-${q}`}
-                                        checked={qualityFilter.includes(q as any)}
-                                        onCheckedChange={(checked) => handleQualityChange(q as any, checked)}
-                                    />
-                                    <Label htmlFor={`q-${q}`} className="capitalize cursor-pointer">{q}</Label>
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-2 gap-3">
+                            {qualityOptions.map((option) => {
+                                const isChecked = qualityFilter.includes(option.value);
+                                return (
+                                    <div
+                                        key={option.value}
+                                        className={cn(
+                                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                                            isChecked
+                                                ? "border-primary/50 bg-primary/5"
+                                                : "border-border hover:bg-accent/50"
+                                        )}
+                                        onClick={() => handleQualityChange(option.value, !isChecked)}
+                                    >
+                                        <Checkbox
+                                            id={`q-${option.value}`}
+                                            checked={isChecked}
+                                            onCheckedChange={(checked) => handleQualityChange(option.value, checked)}
+                                            className="pointer-events-none"
+                                        />
+                                        <div>
+                                            <Label
+                                                htmlFor={`q-${option.value}`}
+                                                className="cursor-pointer text-sm font-medium"
+                                            >
+                                                {option.label}
+                                            </Label>
+                                            <p className="text-xs text-muted-foreground">{option.desc}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
+                        {qualityFilter.length === 0 && (
+                            <p className="text-xs text-destructive">Select at least one quality</p>
+                        )}
                     </div>
                 </div>
-                <div className="flex justify-end">
-                    <Button variant="ghost" onClick={resetSettings} className="mr-auto text-muted-foreground">
-                        Reset Defaults
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleReset}
+                        className="mr-auto"
+                    >
+                        <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                        Reset
                     </Button>
-                    <Button type="submit" onClick={(e) => (e.target as HTMLElement).closest('dialog')?.close()}>Done</Button>
-                </div>
+                    <Button
+                        onClick={handleSaveAndClose}
+                        size="sm"
+                        disabled={qualityFilter.length === 0}
+                    >
+                        Save
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

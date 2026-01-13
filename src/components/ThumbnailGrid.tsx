@@ -177,17 +177,21 @@ const ThumbnailCard = React.memo<ThumbnailCardProps>(({
                         <Eye className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] md:max-w-5xl w-full p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
+                    <DialogContent className="max-w-[90vw] md:max-w-4xl w-full p-0 bg-transparent border-none shadow-none overflow-visible">
                       <DialogTitle className="sr-only">Preview {thumb.quality}</DialogTitle>
-                      <div className="relative w-full flex justify-center">
+
+                      {/* Close button bulging out of top-right corner - tilted, straightens on hover */}
+                      <DialogClose className="absolute -top-3 -right-3 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl p-2.5 shadow-lg hover:shadow-xl z-[100] border-2 border-red-200 rotate-12 hover:rotate-0 transition-all duration-300 ease-out">
+                        <X className="w-5 h-5" />
+                      </DialogClose>
+
+                      {/* Image viewer container */}
+                      <div className="w-full aspect-video rounded-2xl overflow-hidden bg-muted border border-border shadow-2xl">
                         <img
                           src={thumb.url}
                           alt={`Preview ${thumb.quality}`}
-                          className="w-full h-auto max-h-[90vh] object-contain rounded-lg shadow-2xl bg-black/50"
+                          className="w-full h-full object-contain rounded-2xl"
                         />
-                        <DialogClose className="absolute top-2 right-2 md:-top-4 md:-right-4 bg-white text-black rounded-full p-1 opacity-70 hover:opacity-100 transition-opacity z-50">
-                          <X className="w-4 h-4" />
-                        </DialogClose>
                       </div>
                     </DialogContent>
                   </Dialog>
@@ -369,26 +373,45 @@ export default function ThumbnailGrid({ results, checkDownloadAllowed, onDownloa
 
   return (
     <div className="space-y-12">
-      <div className="flex justify-between items-center bg-card p-4 rounded-lg border shadow-sm sticky top-16 z-40 transition-all hover:shadow-md">
-        <div>
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            Results
-            <Badge variant="secondary">{results.length} {results.length === 1 ? "Video" : "Videos"}</Badge>
-          </h2>
+      {/* Results Bar - Minimal */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex justify-between items-center px-5 py-3 rounded-xl bg-card border border-border/50 shadow-sm sticky top-16 z-40"
+      >
+        {/* Left side - Title and count */}
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 bg-primary rounded-full" />
+          <h2 className="text-base font-semibold">Results</h2>
+          <Badge variant="default" className="px-2.5 py-0.5 text-xs font-medium">
+            {results.length} {results.length === 1 ? "Video" : "Videos"}
+          </Badge>
         </div>
-        <Button onClick={downloadAllZip} disabled={isZipping} className="shadow-md rounded-r-none border-r-0">
-          {isZipping ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Zipping...
-            </>
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4" /> Download All (ZIP)
-            </>
-          )}
-        </Button>
-        <ZipSettingsDialog />
-      </div>
+
+        {/* Right side - Actions */}
+        <div className="flex items-center rounded-lg overflow-hidden border border-border/50 shadow-sm">
+          <Button
+            onClick={downloadAllZip}
+            disabled={isZipping}
+            size="sm"
+            className="rounded-none h-9 px-4 font-medium"
+          >
+            {isZipping ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Zipping...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Download All
+              </>
+            )}
+          </Button>
+          <ZipSettingsDialog />
+        </div>
+      </motion.div>
 
       {results.map((videoData, index) => (
         <motion.div

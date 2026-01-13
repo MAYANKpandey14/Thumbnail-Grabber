@@ -20,17 +20,17 @@ export const getThumbnails = async (url: string): Promise<ThumbnailResponse | nu
     const title = await getVideoTitle(`https://www.youtube.com/watch?v=${videoId}`);
 
     const qualities = [
-        { quality: 'maxres', suffix: 'maxresdefault' },
-        { quality: 'hq', suffix: 'hqdefault' },
-        { quality: 'mq', suffix: 'mqdefault' },
-        { quality: 'sd', suffix: 'sddefault' },
-        { quality: 'default', suffix: 'default' },
+        { quality: 'maxres', suffix: 'maxresdefault', dimensions: '1280x720' },
+        { quality: 'hq', suffix: 'hqdefault', dimensions: '480x360' },
+        { quality: 'mq', suffix: 'mqdefault', dimensions: '320x180' },
+        { quality: 'sd', suffix: 'sddefault', dimensions: '640x480' },
+        { quality: 'default', suffix: 'default', dimensions: '120x90' },
     ] as const;
 
     const thumbnails: Thumbnail[] = qualities.map((q) => ({
         quality: q.quality,
         url: getThumbnailUrl(videoId, q.suffix),
-        dimensions: '1280x720',
+        dimensions: q.dimensions,
     }));
 
     return {
