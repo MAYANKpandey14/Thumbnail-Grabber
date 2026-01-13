@@ -11,7 +11,7 @@ import { extractVideoId } from "@/utils/extractVideoId";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useBulkCsv } from "@/hooks/useBulkCsv";
-import heroIcon from "@/assets/Thumbnail_Grabber.png";
+import heroIcon from "@/assets/Thumbnail_Grabber.avif";
 import { HeroHighlight } from "@/components/ui/hero-highlight";
 
 interface HeroInputProps {

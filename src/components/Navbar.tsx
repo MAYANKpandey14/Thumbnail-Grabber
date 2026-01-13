@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import heroIcon from "@/assets/Thumbnail_Grabber.png";
+import heroIcon from "@/assets/Thumbnail_Grabber.avif";
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
